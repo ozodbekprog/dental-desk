@@ -1,26 +1,127 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-ink: #13262a;
+  --color-ink-soft: #2c4449;
+  --color-muted: #587076;
+  --color-line: #d6e1e2;
+  --color-line-strong: #b7cacd;
+  --color-surface: #ffffff;
+  --color-surface-2: #f4f8f8;
+  --color-bg: #eef3f3;
+  --color-accent: #0c6a72;
+  --color-accent-strong: #084f55;
+  --color-accent-soft: #d8eef0;
+  --color-gold: #c8a15a;
+  --color-ok: #1c7549;
+  --color-warn: #a85408;
+  --color-danger: #c3302a;
+  --font-sans: var(--font-onest);
+  --font-display: var(--font-manrope);
+  --font-mono: var(--font-plex-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+:root {
+  --shadow-soft: 0 18px 50px -24px rgba(19, 38, 42, 0.35);
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-bg);
+  color: var(--color-ink);
+  font-family: var(--font-sans), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: var(--color-accent);
+  color: #fff;
+}
+
+.dd-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-line);
+  border-radius: 20px;
+  box-shadow: 0 1px 0 rgba(19, 38, 42, 0.04);
+}
+
+.dd-display {
+  font-family: var(--font-display), system-ui, sans-serif;
+  letter-spacing: -0.03em;
+}
+
+.dd-mono {
+  font-family: var(--font-mono), ui-monospace, monospace;
+}
+
+.dd-input {
+  width: 100%;
+  border: 1px solid var(--color-line-strong);
+  background: #fff;
+  border-radius: 12px;
+  padding: 0.72rem 0.9rem;
+  font-size: 0.95rem;
+  color: var(--color-ink);
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.dd-input:focus {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px rgba(12, 106, 114, 0.14);
+}
+
+.dd-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 12px;
+  padding: 0.72rem 1.15rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+  transition: background 0.15s, color 0.15s, border-color 0.15s, transform 0.15s;
+  cursor: pointer;
+}
+
+.dd-btn:active {
+  transform: translateY(1px);
+}
+
+.dd-btn-primary {
+  background: var(--color-accent);
+  color: #fff;
+  border: 1px solid var(--color-accent);
+}
+
+.dd-btn-primary:hover {
+  background: var(--color-accent-strong);
+}
+
+.dd-btn-ghost {
+  background: transparent;
+  color: var(--color-ink);
+  border: 1px solid var(--color-line-strong);
+}
+
+.dd-btn-ghost:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
+.dd-label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--color-muted);
+  margin-bottom: 0.4rem;
+}
+
+.dd-noise {
+  background-image: radial-gradient(rgba(12, 106, 114, 0.08) 1px, transparent 1px);
+  background-size: 18px 18px;
 }

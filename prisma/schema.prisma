@@ -1,0 +1,69 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Clinic {
+  id          String    @id @default(cuid())
+  name        String
+  slug        String    @unique
+  plan        String    @default("trial") // trial | start | clinic | network
+  status      String    @default("active") // active | expired | suspended
+  trialEndsAt DateTime?
+  paidUntil   DateTime?
+  createdAt   DateTime  @default(now())
+  users       User[]
+  records     Record[]
+  invoices    Invoice[]
+}
+
+model Invoice {
+  id          String    @id @default(cuid())
+  clinicId    String
+  clinic      Clinic    @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  number      String    @unique
+  plan        String
+  amount      Int
+  months      Int       @default(1)
+  periodStart DateTime
+  periodEnd   DateTime
+  status      String    @default("pending") // pending | paid | void
+  method      String    @default("manual") // manual | bank | payme | click
+  note        String    @default("")
+  createdAt   DateTime  @default(now())
+  paidAt      DateTime?
+
+  @@index([clinicId, status])
+  @@index([status, periodEnd])
+}
+
+model User {
+  id           String   @id @default(cuid())
+  clinicId     String?
+  clinic       Clinic?  @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  email        String   @unique
+  passwordHash String
+  name         String
+  role         String   @default("owner") // super | owner | admin | doctor | reception | callcenter | viewer
+  createdAt    DateTime @default(now())
+
+  @@index([clinicId])
+}
+
+model Record {
+  id         String   @id @default(cuid())
+  clinicId   String
+  clinic     Clinic   @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  collection String
+  docId      String
+  data       String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([clinicId, collection, docId])
+  @@index([clinicId, collection])
+}

@@ -1,0 +1,31 @@
+Dental Desk
+===========
+
+Owner:      Ozodbek Xoshimov Xusanovich (Xoshimov Group)
+Copyright:  (c) 2026 Ozodbek Xoshimov Xusanovich, Xoshimov Group
+Contact:    https://t.me/oz4vka
+
+Dental Desk is a clinic management product for dental clinics:
+scheduling, patient records, visit history and a 3D tooth chart.
+
+The application shell in `content/app.html` originates from a single-file
+prototype ("Dental Desk") developed for Xoshimov Group. It was adapted for
+multi-tenant SaaS use with a REST backend, authentication and role-based
+access. All rights remain with the copyright holder.
+
+Third-party software
+--------------------
+
+- Next.js, React, Prisma — MIT License.
+- bcryptjs — MIT License.
+- jose — MIT License.
+- Three.js r128 (`public/app-assets/three.min.js`) — MIT License,
+  copyright (c) 2010-2021 three.js authors.
+- Manrope, Onest, IBM Plex Mono — SIL Open Font License 1.1,
+  served through Google Fonts / next/font.
+
+All other product names, logos and brands mentioned in the application are
+property of their respective owners.
+
+No patient data is included in this repository. The "Example" records
+created by the demo seed are fictional.
