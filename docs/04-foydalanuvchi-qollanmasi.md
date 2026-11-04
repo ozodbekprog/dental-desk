@@ -99,7 +99,28 @@ Tashrif ekranida:
 
 Tashrif yopilgach, u bemor kartasi va tarixda saqlanadi.
 
-## 8. Onlayn yozilish va qabul navbati
+## 8. Narxlar katalogi
+
+**Narxlar** bo'limi har bir shifokorning shaxsiy narx ro'yxatini yuritadi.
+
+1. Yuqoridagi shifokor tugmalaridan kerakli shifokorni tanlang.
+2. **Muolajalar** va **Qo'shimcha xarajatlar** ro'yxatida narxni kiriting.
+   Bo'sh qatorlar **Kelishiladi** deb belgilanadi — bu narx hali qo'yilmaganini
+   bildiradi.
+3. **Narxlarni saqlash** tugmasini bosing.
+
+Ruxsatlar:
+
+- egasi va administrator istalgan shifokorning narxlarini tahrirlaydi;
+- shifokor faqat o'z ro'yxatini tahrirlaydi, boshqalarnikini faqat ko'radi;
+- qabulxona, call markaz va kuzatuvchi faqat ko'radi.
+
+Narxlar qabul formasida avtomatik ishlatiladi: muolaja yoki qo'shimcha xarajat
+tanlanganda narx katalogdan olinadi. Shifokor qabulda yakuniy narxni o'zgartira
+oladi; shifokor almashtirilsa, narxlar yangi shifokor katalogiga moslanadi.
+Narx qo'yilmagan xizmatlar tashrif tarixida **Kelishiladi** deb ko'rinadi.
+
+## 9. Onlayn yozilish va qabul navbati
 
 ### Bemor uchun
 
@@ -139,7 +160,7 @@ Call markaz roli faqat shu navbat va jadval bilan ishlaydi: bemorlar bo'limi,
 tashriflar tarixi va klinik ogohlantirishlar unga ko'rinmaydi. U so'rovni
 bog'lab, tasdiqlashi mumkin, lekin shifokor yozuvlarini o'zgartira olmaydi.
 
-## 9. AI yordamchi
+## 10. AI yordamchi
 
 Ilovaning o'ng pastki burchagidagi **AI yordamchi** tugmasi chat oynasini ochadi.
 
@@ -170,7 +191,7 @@ Cheklovlar:
 - Yordamchi jadval bilan bir xil qoidalarda yozadi (band slot, tushlik, dam
   kuni). Natijani har doim jadvalda tekshirib turing.
 
-## 10. Namuna yozuvlar
+## 11. Namuna yozuvlar
 
 Yangi klinikada 37 ta namuna yozuv bo'ladi (shifokorlar, bemorlar, qabullar,
 ikkita onlayn so'rov).
@@ -179,7 +200,7 @@ yuqoridagi **Namunalarni o'chirish** tugmasini bosing.
 
 Namuna yozuvlar demo maqsadida; ularni tahrirlab haqiqiy bemorga aylantirmang.
 
-## 11. Ko'p so'raladigan savollar
+## 12. Ko'p so'raladigan savollar
 
 **Ikki bemor bir vaqtga yozildi.** Tizim band slotni taklif qilmaydi: onlayn
 so'rov va tasdiqlanmagan so'rov ham vaqtni ushlab turadi. Ikkinchi qabulni

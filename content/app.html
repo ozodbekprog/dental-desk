@@ -336,11 +336,20 @@ details.more>summary{cursor:pointer;font-weight:600;color:var(--accent);font-siz
 .radios input{width:auto;min-height:0}
 .inline-warn{color:var(--warn);background:var(--warn-soft);padding:8px 10px;border-radius:8px;font-size:14px}
 .dr-row{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:8px 0;border-top:1px solid var(--line)}
+/* doctor price list */
+.prices-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px;align-items:start}
+.pricerow{display:grid;grid-template-columns:minmax(0,1fr) 150px 108px;gap:10px;align-items:center;padding:7px 0;border-top:1px solid var(--line)}
+.pricerow:first-of-type{border-top:0}
+.pricerow .pname{font-weight:600;font-size:14px}
+.pricerow input{margin:0;min-height:38px}
+.pbadge{font-size:12px;font-weight:700;color:var(--warn);background:var(--warn-soft);padding:4px 8px;border-radius:999px;text-align:center}
+.prices-grid .sect-title{margin:0 0 6px}
 
 @media (max-width:980px){
   .sched,.book{grid-template-columns:minmax(0,1fr)}
   .chart-grid{grid-template-columns:minmax(0,1fr)}
   .stats,.qstats{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .prices-grid{grid-template-columns:minmax(0,1fr)}
 }
 @media (max-width:640px){
   .appt{grid-template-columns:64px minmax(0,1fr)}
@@ -357,6 +366,8 @@ details.more>summary{cursor:pointer;font-weight:600;color:var(--accent);font-siz
   .qinfo{grid-template-columns:minmax(0,1fr)}
   .qacts{justify-content:flex-start;max-width:none}
   .qsearch{max-width:none;margin-left:0;flex-basis:100%}
+  .pricerow{grid-template-columns:minmax(0,1fr) 116px}
+  .pbadge{display:none}
 }
 @media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
 </style>
@@ -565,7 +576,12 @@ var FOLLOW = [["none", 0], ["w1", 7], ["w2", 14], ["m1", 30], ["m3", 91], ["m6",
 /* ================= interface strings ================= */
 var STR = {
   en: {
-    nav_schedule: "Schedule", nav_patients: "Patients", nav_book: "Online booking", nav_settings: "Settings",
+    nav_schedule: "Schedule", nav_patients: "Patients", nav_book: "Online booking", nav_settings: "Settings", nav_prices: "Prices",
+    prices_title: "Price list", prices_sub: "Every doctor keeps their own prices. A field left empty shows as “By agreement”.",
+    prices_procs: "Procedures", prices_extras: "Additional costs", prices_save: "Save prices", prices_saved: "Prices saved",
+    prices_readonly: "Only this doctor or the clinic owner can change these prices.", prices_no_doctors: "Add a doctor first — a price list belongs to a doctor.",
+    prices_hint: "These prices fill the visit form automatically. The doctor can still change the final price inside the visit.",
+    by_agreement: "By agreement", catalog_price: "List price: {v}", by_agreement_hint: "No list price — agreed with the patient",
     doctor: "Doctor", all_doctors: "All doctors", manage_doctors: "Doctors", doctors_title: "Doctors",
     lang: "Language", theme: "Theme", theme_light: "Light", theme_auto: "Auto", theme_dark: "Dark",
     cancel: "Cancel", save: "Save", close: "Close", edit: "Edit", delete: "Delete", remove: "Remove", change: "Change", add: "Add", back_all: "← All patients",
@@ -636,7 +652,12 @@ var STR = {
     ask_nothing: "—"
   },
   ru: {
-    nav_schedule: "Расписание", nav_patients: "Пациенты", nav_book: "Онлайн-запись", nav_settings: "Настройки",
+    nav_schedule: "Расписание", nav_patients: "Пациенты", nav_book: "Онлайн-запись", nav_settings: "Настройки", nav_prices: "Цены",
+    prices_title: "Прайс-лист", prices_sub: "У каждого врача свои цены. Пустое поле показывается как «По договорённости».",
+    prices_procs: "Процедуры", prices_extras: "Дополнительные расходы", prices_save: "Сохранить цены", prices_saved: "Цены сохранены",
+    prices_readonly: "Менять цены может только этот врач или владелец клиники.", prices_no_doctors: "Сначала добавьте врача — прайс-лист принадлежит врачу.",
+    prices_hint: "Эти цены автоматически подставляются в приём. Врач может изменить итоговую цену внутри приёма.",
+    by_agreement: "По договорённости", catalog_price: "Цена по прайсу: {v}", by_agreement_hint: "Цены нет — по договорённости",
     doctor: "Врач", all_doctors: "Все врачи", manage_doctors: "Врачи", doctors_title: "Врачи",
     lang: "Язык", theme: "Тема", theme_light: "Светлая", theme_auto: "Авто", theme_dark: "Тёмная",
     cancel: "Отмена", save: "Сохранить", close: "Закрыть", edit: "Изменить", delete: "Удалить", remove: "Убрать", change: "Изменить", add: "Добавить", back_all: "← Все пациенты",
@@ -707,7 +728,12 @@ var STR = {
     ask_nothing: "—"
   },
   uz: {
-    nav_schedule: "Jadval", nav_patients: "Bemorlar", nav_book: "Onlayn yozilish", nav_settings: "Sozlamalar",
+    nav_schedule: "Jadval", nav_patients: "Bemorlar", nav_book: "Onlayn yozilish", nav_settings: "Sozlamalar", nav_prices: "Narxlar",
+    prices_title: "Narxlar katalogi", prices_sub: "Har bir shifokor o'z narxlarini yuritadi. Bo'sh qoldirilgan narx «Kelishiladi» deb ko'rinadi.",
+    prices_procs: "Muolajalar", prices_extras: "Qo'shimcha xarajatlar", prices_save: "Narxlarni saqlash", prices_saved: "Narxlar saqlandi",
+    prices_readonly: "Bu narxlarni faqat shu shifokor yoki klinika egasi o'zgartira oladi.", prices_no_doctors: "Avval shifokor qo'shing — narxlar katalogi shifokorga tegishli.",
+    prices_hint: "Bu narxlar qabul formasiga avtomatik tushadi. Shifokor qabulda yakuniy narxni o'zgartira oladi.",
+    by_agreement: "Kelishiladi", catalog_price: "Katalog narxi: {v}", by_agreement_hint: "Narx qo'yilmagan — kelishiladi",
     doctor: "Shifokor", all_doctors: "Barcha shifokorlar", manage_doctors: "Shifokorlar", doctors_title: "Shifokorlar",
     lang: "Til", theme: "Mavzu", theme_light: "Yorug'", theme_auto: "Avto", theme_dark: "Qorong'i",
     cancel: "Bekor qilish", save: "Saqlash", close: "Yopish", edit: "Tahrirlash", delete: "O'chirish", remove: "Olib tashlash", change: "O'zgartirish", add: "Qo'shish", back_all: "← Barcha bemorlar",
@@ -1771,6 +1797,56 @@ function renderPatients() {
   $("#plist").innerHTML = html;
 }
 
+/* ================= doctor price list ================= */
+function priceDoc(docId) { return byId(state.prices, docId) || { id: docId, doctorId: docId, items: {} }; }
+function catPrice(docId, kind, id) {
+  if (!docId || !id) return 0;
+  var pd = priceDoc(docId), m = (pd.items && pd.items[kind]) || {};
+  return +m[id] || 0;
+}
+function priceDoctorId() {
+  var docs = sortedDoctors();
+  if (state.priceDoc && byId(docs, state.priceDoc)) return state.priceDoc;
+  var my = byId(docs, state.uid);
+  return my ? my.id : (docs[0] ? docs[0].id : "");
+}
+function canEditPrices(docId) { return canWrite() && (canManageDoctors() || (!!docId && docId === state.uid)); }
+function priceRowHtml(kind, id, label, docId, editable) {
+  var v = catPrice(docId, kind, id);
+  return '<div class="pricerow"><span class="pname">' + esc(label) + "</span>" +
+    '<input type="text" inputmode="numeric" data-price-kind="' + kind + '" data-price-key="' + esc(id) + '" value="' + (v || "") + '" placeholder="—"' + (editable ? "" : " disabled") + ">" +
+    '<span class="pbadge"' + (v ? " hidden" : "") + ">" + esc(t("by_agreement")) + "</span></div>";
+}
+function renderPrices() {
+  var docs = sortedDoctors(), docId = priceDoctorId(), editable = canEditPrices(docId);
+  var h = '<div class="page-head"><div><h1>' + esc(t("prices_title")) + '</h1><p class="sub">' + esc(t("prices_sub")) + "</p></div><div class=\"actions\">" +
+    (editable ? '<button class="btn btn-primary" data-act="prices-save">' + esc(t("prices_save")) + "</button>" : "") + "</div></div>";
+  if (!allLoaded()) { $("#view-prices").innerHTML = h + '<div class="empty">' + esc(t("loading")) + "</div>"; return; }
+  if (!docs.length) { $("#view-prices").innerHTML = h + '<div class="empty"><strong>' + esc(t("prices_no_doctors")) + "</strong></div>"; return; }
+  h += '<div class="docs" style="margin-bottom:14px">' + docs.map(function (d) {
+    return '<button type="button" class="docbtn" data-act="price-doc" data-id="' + esc(d.id) + '" aria-pressed="' + (d.id === docId) + '"><b>' + esc(d.name) + "</b><span>" + esc(specLabel(d.spec) || "") + "</span></button>";
+  }).join("") + "</div>";
+  if (!editable) h += '<div class="notice warn">' + esc(t("prices_readonly")) + "</div>";
+  h += '<div class="prices-grid"><section class="card"><h2 class="sect-title">' + esc(t("prices_procs")) + "</h2>" +
+    PROCS.map(function (p) { return priceRowHtml("procs", p[0], p[3 + LI[state.lang]], docId, editable); }).join("") + "</section>" +
+    '<section class="card"><h2 class="sect-title">' + esc(t("prices_extras")) + "</h2>" +
+    EXTRAS.map(function (e) { return priceRowHtml("extras", e[0], e[1 + LI[state.lang]], docId, editable); }).join("") + "</section></div>" +
+    '<p class="hint">' + esc(t("prices_hint")) + "</p>";
+  $("#view-prices").innerHTML = h;
+}
+function savePrices() {
+  var docId = priceDoctorId();
+  if (!canEditPrices(docId)) return;
+  var items = { procs: {}, extras: {} };
+  $$('#view-prices [data-price-kind]').forEach(function (inp) {
+    var v = num(inp.value);
+    if (v > 0) items[inp.dataset.priceKind][inp.dataset.priceKey] = v;
+  });
+  save("prices", docId, { doctorId: docId, items: items, updatedAt: Date.now(), updatedBy: state.userName || "" }).then(function (ok) {
+    if (ok) { toast(t("prices_saved")); renderPrices(); }
+  });
+}
+
 /* ================= modal ================= */
 var lastFocus = null;
 function openModal(title, bodyHtml, footHtml, onSubmit, onOpen) {
@@ -2134,7 +2210,7 @@ function toothPanelHtml() {
   if (tk.length) h += '<div class="sect-title">' + esc(t("tools_used")) + '</div><div class="chips" style="margin:0 0 8px">' + tk.map(function (k) { return '<span class="chip">' + esc(toolLabel(k)) + " <em>×" + ts[k] + "</em></span>"; }).join("") + "</div>";
   h += '<ol class="timeline">' + tt.entries.slice().reverse().map(function (e) {
     var p = e.proc, v = e.visit;
-    return '<li class="tl"><div class="dt">' + esc(fmtDate(v.date)) + '</div><div><div class="ti">' + esc(procLabel(p.type)) + esc(surfTxt(p)) + (p.price ? ' <span class="muted" style="font-weight:600">· ' + esc(money(p.price)) + "</span>" : "") + '</div><div class="muted">' + esc(doctorLabel(v.doctorId, v.doctorName)) + "</div>" + toolChips(p) +
+    return '<li class="tl"><div class="dt">' + esc(fmtDate(v.date)) + '</div><div><div class="ti">' + esc(procLabel(p.type)) + esc(surfTxt(p)) + (p.price ? ' <span class="muted" style="font-weight:600">· ' + esc(money(p.price)) + "</span>" : ' <span class="tag">' + esc(t("by_agreement")) + "</span>") + '</div><div class="muted">' + esc(doctorLabel(v.doctorId, v.doctorName)) + "</div>" + toolChips(p) +
       (p.note ? '<div class="note">' + esc(p.note) + "</div>" : "") + (v.notes ? '<div class="note">' + esc(v.notes) + "</div>" : "") + "</div></li>";
   }).join("") + "</ol>";
   return h;
@@ -2142,7 +2218,7 @@ function toothPanelHtml() {
 function visitHtml(v, ro) {
   var open = state.chart.openVisits[v.id] ? " open" : "", total = visitTotal(v);
   var procs = (v.procedures || []).map(function (p) {
-    return '<div class="vproc"><div class="t">' + (p.tooth ? '<span class="fdi">' + numOf(+p.tooth) + "</span>" : "") + esc(procLabel(p.type)) + esc(surfTxt(p)) + (p.price ? ' <span class="muted" style="font-weight:600">· ' + esc(money(p.price)) + "</span>" : "") + "</div>" + toolChips(p) + (p.note ? '<div class="note muted">' + esc(p.note) + "</div>" : "") + "</div>";
+    return '<div class="vproc"><div class="t">' + (p.tooth ? '<span class="fdi">' + numOf(+p.tooth) + "</span>" : "") + esc(procLabel(p.type)) + esc(surfTxt(p)) + (p.price ? ' <span class="muted" style="font-weight:600">· ' + esc(money(p.price)) + "</span>" : ' <span class="tag">' + esc(t("by_agreement")) + "</span>") + "</div>" + toolChips(p) + (p.note ? '<div class="note muted">' + esc(p.note) + "</div>" : "") + "</div>";
   }).join("");
   var ex = (v.extras || []).length ? '<div class="vproc"><div class="sect-title">' + esc(t("extras")) + '</div><div class="chips">' + v.extras.map(function (e) { return '<span class="chip">' + esc(extraLabel(e.id)) + " <em>" + esc(money(e.price)) + "</em></span>"; }).join("") + "</div></div>" : "";
   var qk = (v.quick || []).map(quickLabel);
@@ -2163,6 +2239,11 @@ function persistDraft() {
   var d = state.chart.draft; if (!d || d.id) return;
   clearTimeout(saveTimer); saveTimer = setTimeout(function () { lsSet(draftKey(ctx.p.id), JSON.stringify(d)); }, 400);
 }
+function fillDraftPrices(d) {
+  if (!d) return;
+  d.procs.forEach(function (p) { if (p.type && !num(p.price)) { var v = catPrice(d.doctorId, "procs", p.type); if (v) p.price = String(v); } });
+  d.extras.forEach(function (x) { if (!num(x.price)) { var v = catPrice(d.doctorId, "extras", x.id); if (v) x.price = String(v); } });
+}
 function startFreshVisit(pid, appt) {
   var docs = sortedDoctors(), my = byId(state.doctors, state.uid);
   var d = { id: null, date: todayStr(), time: "", doctorId: appt ? appt.doctorId : (state.doctorId !== "all" ? state.doctorId : (my ? my.id : (docs[0] ? docs[0].id : ""))), reason: appt ? (appt.reason || (appt.reasonOther ? "__other" : "")) : "", reasonOther: appt ? (appt.reasonOther || "") : "",
@@ -2170,6 +2251,7 @@ function startFreshVisit(pid, appt) {
   var raw = lsGet(draftKey(pid));
   if (raw && !appt) { try { var r = JSON.parse(raw); if (r && r.procs) { d = r; toast(t("draft_restored")); } } catch (e) { } }
   if (state.chart.tooth && !d.procs.length) d.procs.push(newProc(state.chart.tooth));
+  fillDraftPrices(d);
   state.chart.draft = d; state.chart.tab = "form"; renderChartParts();
 }
 function startEditVisit(id) {
@@ -2200,7 +2282,9 @@ function procFormHtml(p, i) {
     h += '<div class="chips">' + p.toolsOther.map(function (x, j) { return '<span class="chip">' + esc(x) + '<button type="button" data-act="tool-other-rm" data-i="' + i + '" data-j="' + j + '" aria-label="' + esc(t("remove")) + '">&times;</button></span>'; }).join("") + "</div>";
     h += '<div class="addtool"><input type="text" data-f="toolOtherInput" data-i="' + i + '" placeholder="' + esc(t("add_other_tool")) + '"><button type="button" class="btn btn-sm" data-act="tool-other-add" data-i="' + i + '">' + esc(t("add")) + "</button></div></div>";
   }
-  h += '<div class="grid2"><div class="field"><label class="lbl">' + esc(t("f_price")) + " (" + esc(t("currency")) + ')</label><input type="text" inputmode="numeric" data-f="price" data-i="' + i + '" value="' + esc(p.price) + '" placeholder="0"></div>' +
+  var cp = catPrice(state.chart.draft ? state.chart.draft.doctorId : "", "procs", p.type);
+  var priceHint = p.type ? (cp ? t("catalog_price", { v: money(cp) }) : t("by_agreement_hint")) : "";
+  h += '<div class="grid2"><div class="field"><label class="lbl">' + esc(t("f_price")) + " (" + esc(t("currency")) + ')</label><input type="text" inputmode="numeric" data-f="price" data-i="' + i + '" value="' + esc(p.price) + '" placeholder="' + esc(cp ? String(cp) : t("by_agreement")) + '"><div class="hint">' + esc(priceHint) + "</div></div>" +
     '<div class="field"><label class="lbl">' + esc(t("f_proc_note")) + '</label><input type="text" data-f="note" data-i="' + i + '" value="' + esc(p.note) + '"></div></div></div>';
   return h;
 }
@@ -2217,7 +2301,7 @@ function formHtml() {
     '<div class="field"><label class="lbl" for="dfReason">' + esc(t("f_reason")) + "</label>" + reasonSelectHtml("dfReason", d.reason).replace("<select ", '<select data-d="reason" ') + '<input type="text" id="dfReasonOther" data-d="reasonOther" style="margin-top:6px" value="' + esc(d.reasonOther) + '"' + (d.reason === "__other" ? "" : " hidden") + "></div>";
   h += '<div class="sect-title">' + esc(t("f_procs")) + "</div>" + d.procs.map(procFormHtml).join("") + '<div class="foot-row" style="margin:0"><button type="button" class="btn" data-act="proc-add">+ ' + esc(t("add_proc")) + "</button></div>";
   h += '<div class="field"><span class="lbl">' + esc(t("extras")) + '</span><div class="opts">' + EXTRAS.map(function (e) { var on = d.extras.some(function (x) { return x.id === e[0]; }); return '<button type="button" class="opt" data-act="extra" data-id="' + e[0] + '" aria-pressed="' + on + '">' + esc(e[1 + LI[state.lang]]) + "</button>"; }).join("") + "</div>" +
-    d.extras.map(function (e, j) { return '<div class="grid2" style="margin-top:6px;align-items:center"><span>' + esc(extraLabel(e.id)) + '</span><input type="text" inputmode="numeric" data-f="extraPrice" data-j="' + j + '" value="' + esc(e.price) + '" placeholder="' + esc(t("f_price")) + " (" + esc(t("currency")) + ')"></div>'; }).join("") + "</div>";
+    d.extras.map(function (e, j) { var ep = catPrice(d.doctorId, "extras", e.id); return '<div class="grid2" style="margin-top:6px;align-items:center"><span>' + esc(extraLabel(e.id)) + '</span><input type="text" inputmode="numeric" data-f="extraPrice" data-j="' + j + '" value="' + esc(e.price) + '" placeholder="' + esc(ep ? String(ep) : t("by_agreement")) + '"></div>'; }).join("") + "</div>";
   h += '<div class="field"><span class="lbl">' + esc(t("f_quick")) + '</span><div class="opts">' + QUICK.map(function (q) { return '<button type="button" class="opt" data-act="quick" data-id="' + q[0] + '" aria-pressed="' + (d.quick.indexOf(q[0]) >= 0) + '">' + esc(q[1 + LI[state.lang]]) + "</button>"; }).join("") + "</div></div>" +
     '<div class="field"><label class="lbl" for="dfNotes">' + esc(t("doctor_comment")) + '</label><textarea id="dfNotes" data-d="notes" rows="3">' + esc(d.notes) + "</textarea></div>";
   if (!d.id) h += '<div class="field"><label class="lbl" for="dfFollow">' + esc(t("f_follow")) + '</label><select id="dfFollow" data-d="follow">' + FOLLOW.map(function (x) { return '<option value="' + x[0] + '"' + (d.follow === x[0] ? " selected" : "") + ">" + esc(t("follow_" + x[0])) + "</option>"; }).join("") + "</select></div>";
@@ -2433,7 +2517,7 @@ document.addEventListener("click", function (e) {
     case "tool": flipArr(d.procs[i].tools, el.dataset.k); el.setAttribute("aria-pressed", String(d.procs[i].tools.indexOf(el.dataset.k) >= 0)); persistDraft(); break;
     case "tool-other-add": { var inp = $('[data-f="toolOtherInput"][data-i="' + i + '"]'), v = inp.value.trim(); if (v) { d.procs[i].toolsOther.push(v); persistDraft(); $("#panel-form").innerHTML = formHtml(); } break; }
     case "tool-other-rm": d.procs[i].toolsOther.splice(+el.dataset.j, 1); persistDraft(); $("#panel-form").innerHTML = formHtml(); break;
-    case "extra": { var k = -1; d.extras.forEach(function (x, j) { if (x.id === id) k = j; }); if (k >= 0) d.extras.splice(k, 1); else d.extras.push({ id: id, price: "" }); persistDraft(); $("#panel-form").innerHTML = formHtml(); break; }
+    case "extra": { var k = -1; d.extras.forEach(function (x, j) { if (x.id === id) k = j; }); if (k >= 0) d.extras.splice(k, 1); else { var ep = catPrice(d.doctorId, "extras", id); d.extras.push({ id: id, price: ep ? String(ep) : "" }); } persistDraft(); $("#panel-form").innerHTML = formHtml(); break; }
     case "quick": flipArr(d.quick, id); el.setAttribute("aria-pressed", String(d.quick.indexOf(id) >= 0)); persistDraft(); break;
     case "tab": c.tab = el.dataset.v; renderChartParts(); break;
     case "view": setChartView(el.dataset.v); break;
@@ -2446,6 +2530,8 @@ document.addEventListener("click", function (e) {
     case "ap-date": state.modal.ap.date = el.dataset.d; apRefresh(); break;
     case "doctor-rm": if (confirmDoctor === id) { removeDoc("doctors", id).then(function () { confirmDoctor = null; renderStaffBody(); }); } else { confirmDoctor = id; renderStaffBody(); } break;
     case "doctor-approve": patch("doctors", id, { pending: false }).then(function () { renderStaffBody(); }); break;
+    case "price-doc": state.priceDoc = id; renderPrices(); break;
+    case "prices-save": savePrices(); break;
     case "q-filter": state.qFilter = el.dataset.v; renderRequests(); break;
     case "q-copy": copyBookingLink(); break;
     case "req-contact": openContactModal(id); break;
@@ -2470,6 +2556,11 @@ document.addEventListener("input", function (e) {
   if (el.id === "pSearch") { state.pSearch = el.value; var q = el.value; renderPatients(); var s = $("#pSearch"); s.focus(); s.setSelectionRange(q.length, q.length); return; }
   if (el.id === "qSearch") { state.qSearch = el.value; renderRequests(); var qs = $("#qSearch"); if (qs) { qs.focus(); try { qs.setSelectionRange(qs.value.length, qs.value.length); } catch (x) { } } return; }
   if (el.id === "pkSearch") { $("#pkResults").innerHTML = pickerResultsHtml(el.value); return; }
+  if (el.dataset && el.dataset.priceKind) {
+    var b = el.parentNode && el.parentNode.querySelector(".pbadge");
+    if (b) b.hidden = !!num(el.value);
+    return;
+  }
   if (el.id === "apReasonOther") { state.modal.ap.reasonOther = el.value; return; }
   if (el.id === "bkName") state.book.name = el.value; if (el.id === "bkPhone") state.book.phone = el.value; if (el.id === "bkReasonOther") state.book.reasonOther = el.value;
   if (d && el.closest("#panel-form")) {
@@ -2497,8 +2588,24 @@ document.addEventListener("change", function (e) {
   if (el.id === "bkReason") { state.book.reason = el.value; $("#bkReasonOther").hidden = el.value !== "__other"; return; }
   if (d && el.closest("#panel-form")) {
     var f = el.dataset.f, i = +el.dataset.i;
-    if (f === "type") { var p = d.procs[i]; p.type = el.value; p.tools = (DEFAULT_TOOLS[p.type] || []).slice(); if (!SURF_PROCS[p.type]) p.surfaces = []; persistDraft(); $("#panel-form").innerHTML = formHtml(); }
+    if (f === "type") { var p = d.procs[i]; p.type = el.value; p.tools = (DEFAULT_TOOLS[p.type] || []).slice(); if (!SURF_PROCS[p.type]) p.surfaces = []; var cpv = catPrice(d.doctorId, "procs", p.type); p.price = cpv ? String(cpv) : ""; persistDraft(); $("#panel-form").innerHTML = formHtml(); }
     else if (f === "tooth") { d.procs[i].tooth = el.value; if (el.value) { c.tooth = +el.value; syncViewer(); renderChartParts(); $("#panel-form").innerHTML = formHtml(); } persistDraft(); }
+    else if (el.dataset.d === "doctorId") {
+      var oldDoc = d.doctorId;
+      d.doctorId = el.value;
+      d.procs.forEach(function (x) {
+        if (!x.type) return;
+        var op = catPrice(oldDoc, "procs", x.type), np = catPrice(d.doctorId, "procs", x.type);
+        if (np && (!num(x.price) || num(x.price) === op)) x.price = String(np);
+        else if (!np && num(x.price) === op) x.price = "";
+      });
+      d.extras.forEach(function (x) {
+        var oe = catPrice(oldDoc, "extras", x.id), ne = catPrice(d.doctorId, "extras", x.id);
+        if (ne && (!num(x.price) || num(x.price) === oe)) x.price = String(ne);
+        else if (!ne && num(x.price) === oe) x.price = "";
+      });
+      persistDraft(); $("#panel-form").innerHTML = formHtml();
+    }
     else if (el.dataset.d) { d[el.dataset.d] = el.value; if (el.dataset.d === "reason") { var ro = $("#dfReasonOther"); if (ro) ro.hidden = el.value !== "__other"; } persistDraft(); }
   }
 });

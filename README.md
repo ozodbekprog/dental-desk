@@ -32,6 +32,11 @@ Egasi va muallifi: **Ozodbek Xoshimov Xusanovich, Xoshimov Group** (2026).
 - **3D tish xaritasi** — 32 tish, FDI/Universal raqamlash, har bir tish bo'yicha
   muolaja va izohlar.
 - **Tashriflar** — muolajalar, to'lov summasi, tish holati, keyingi ko'rik.
+- **Shifokor narxlari** — har bir shifokor o'z narxlar katalogini yuritadi;
+  katalogda shifokor tanlanadi va uning narxlari ko'rinadi. Narx qo'yilmagan
+  qatorlar **Kelishiladi** deb belgilanadi. Narxlar qabul formasiga avtomatik
+  tushadi, yakuniy summani shifokor qabulda o'zgartira oladi. Egasi/administrator
+  istalgan shifokor narxini, shifokor esa faqat o'zinikini tahrirlaydi.
 - **Xodimlar va rollar** — egasi, administrator, shifokor, qabulxona, call
   markaz, kuzatuvchi. Call markaz faqat so'rovlar navbati bilan ishlaydi; klinik
   yozuvlar (tashriflar, tarix, ogohlantirishlar) unga ko'rinmaydi.
