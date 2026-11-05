@@ -308,5 +308,252 @@ export function demoRecords(today = new Date()): SeedRecord[] {
     demo: true,
   });
 
+  seedV2(records, { today, now, day, todayStr, doctors, patients, visits });
+
   return records;
+}
+
+function seedV2(
+  records: SeedRecord[],
+  bag: {
+    today: Date;
+    now: number;
+    day: (offset: number) => string;
+    todayStr: string;
+    doctors: { id: string; name: string; spec: string }[];
+    patients: { id: string; name: string }[];
+    visits: { id: string; patientId: string; date: string; doctorId: string; doctorName: string; total: number }[];
+  }
+) {
+  const { today, now, day, todayStr, doctors, patients, visits } = bag;
+  const push = (collection: string, docId: string, data: Record<string, unknown>) =>
+    records.push({ collection, docId, data });
+  const demo = { demo: true };
+
+  push("branches", "dd-demo-b1", {
+    name: "Markaziy klinika",
+    address: "Toshkent, Chilonzor 14",
+    phone: "+998 71 200 00 01",
+    timezone: "Asia/Tashkent",
+    active: true,
+    ...demo,
+  });
+
+  const chairs = [
+    { id: "dd-demo-c1", name: "Kabinet 1", branchId: "dd-demo-b1" },
+    { id: "dd-demo-c2", name: "Kabinet 2", branchId: "dd-demo-b1" },
+    { id: "dd-demo-c3", name: "Kabinet 3", branchId: "dd-demo-b1" },
+  ];
+  for (const c of chairs) push("chairs", c.id, { ...c, active: true, ...demo });
+
+  const shifts: [string, string, string][] = [
+    ["dd-demo-d1", "09:00", "18:00"],
+    ["dd-demo-d2", "09:00", "18:00"],
+    ["dd-demo-d3", "10:00", "19:00"],
+  ];
+  shifts.forEach(([doctorId, from, to], i) => {
+    push("shifts", `dd-demo-s${i + 1}`, { doctorId, date: todayStr, from, to, chairId: chairs[i].id, ...demo });
+  });
+
+  push("waitlist", "dd-demo-w1", {
+    patientId: "dd-demo-p9",
+    patientName: "Shahzoda Mirzaeva",
+    doctorId: "dd-demo-d1",
+    date: day(1),
+    note: "Bo'sh vaqt chiqsa, ertalab qo'ng'iroq qiling.",
+    status: "waiting",
+    createdAt: now - 3 * 3600000,
+    ...demo,
+  });
+
+  // --- clinical ---
+  push("toothHistory", "dd-demo-p5", {
+    patientId: "dd-demo-p5",
+    teeth: {
+      "16": [{ date: day(-14), visitId: "dd-demo-v3", proc: "filling", surfaces: ["O", "M"], note: "Kompozit", ...demo }],
+    },
+    ...demo,
+  });
+  push("toothHistory", "dd-demo-p2", {
+    patientId: "dd-demo-p2",
+    teeth: {
+      "11": [{ date: day(-30), visitId: "dd-demo-v4", proc: "endo", canal: "22 mm", note: "Ildiz davolangan", ...demo }],
+    },
+    ...demo,
+  });
+
+  const icd: [string, string, string, string][] = [
+    ["K02.1", "Dentin kariesi", "Кариес дентина", "Caries of dentine"],
+    ["K02.9", "Karies, aniqlanmagan", "Кариес неуточнённый", "Dental caries, unspecified"],
+    ["K04.0", "Pulpit", "Пульпит", "Pulpitis"],
+    ["K04.5", "Apikal periodontit", "Апикальный периодонтит", "Apical periodontitis"],
+    ["K05.1", "Surunkali gingivit", "Хронический гингивит", "Chronic gingivitis"],
+    ["K05.3", "Surunkali periodontit", "Хронический периодонтит", "Chronic periodontitis"],
+    ["K07.3", "Tishlash anomaliyasi", "Аномалия прикуса", "Anomaly of tooth position"],
+    ["K08.1", "Tish yo'qolishi", "Потеря зубов", "Loss of teeth"],
+    ["K01.0", "Retensiya", "Ретинированный зуб", "Embedded teeth"],
+  ];
+  icd.forEach(([code, uz, ru, en], i) => {
+    push("diagnoses", code, { code, nameUz: uz, nameRu: ru, nameEn: en, category: "K", order: i, ...demo });
+  });
+
+  push("templates", "dd-demo-t1", {
+    name: "Karies davolash",
+    diagnosis: "K02.1",
+    items: [
+      { proc: "exam", tooth: null, note: "" },
+      { proc: "filling", tooth: null, note: "Kompozit" },
+    ],
+    quick: ["control"],
+    ...demo,
+  });
+  push("templates", "dd-demo-t2", {
+    name: "Kanal davolash",
+    diagnosis: "K04.0",
+    items: [
+      { proc: "endo", tooth: null, note: "" },
+      { proc: "crown", tooth: null, note: "" },
+    ],
+    quick: ["control", "xraynext"],
+    ...demo,
+  });
+
+  push("plans", "dd-demo-pl1", {
+    patientId: "dd-demo-p6",
+    title: "26-tishni tiklash rejasi",
+    variants: [
+      {
+        id: "v1",
+        name: "Standart",
+        stages: [
+          { name: "1-bosqich", items: [{ proc: "endo", tooth: 26, qty: 1, price: 900000, done: true }] },
+          { name: "2-bosqich", items: [{ proc: "filling", tooth: 26, qty: 1, price: 400000, done: false }] },
+        ],
+      },
+      {
+        id: "v2",
+        name: "Premium",
+        stages: [
+          { name: "1-bosqich", items: [{ proc: "endo", tooth: 26, qty: 1, price: 900000, done: true }] },
+          { name: "2-bosqich", items: [{ proc: "crown", tooth: 26, qty: 1, price: 1200000, done: false }] },
+        ],
+      },
+    ],
+    acceptedVariant: "v2",
+    createdAt: now - 5 * 86400000,
+    ...demo,
+  });
+
+  push("labs", "dd-demo-lab1", {
+    name: "Zirconia Lab",
+    contact: "+998 90 100 20 30",
+    ...demo,
+  });
+  push("labOrders", "dd-demo-lo1", {
+    patientId: "dd-demo-p6",
+    patientName: "Aziz Toshpulatov",
+    doctorId: "dd-demo-d3",
+    doctorName: "Dr. Nilufar Yusupova",
+    labId: "dd-demo-lab1",
+    labName: "Zirconia Lab",
+    work: "Tsirkoniy koronka",
+    tooth: 26,
+    sentAt: day(-4),
+    dueAt: day(3),
+    stages: [
+      { name: "Skan", status: "done", at: now - 4 * 86400000 },
+      { name: "Modellashtirish", status: "done", at: now - 3 * 86400000 },
+      { name: "Milling", status: "active", at: now - 86400000 },
+      { name: "Sirlash", status: "pending" },
+    ],
+    fee: 450000,
+    feeType: "fixed",
+    ...demo,
+  });
+
+  // --- finance ---
+  for (const v of visits) {
+    push("payments", `dd-demo-pay-${v.id}`, {
+      patientId: v.patientId,
+      visitId: v.id,
+      amount: v.total,
+      method: "cash",
+      discount: 0,
+      at: now - 3 * 86400000,
+      by: v.doctorName,
+      receiptNo: `R-${v.id.slice(-2).toUpperCase()}`,
+      ...demo,
+    });
+  }
+  push("payments", "dd-demo-pay-debt", {
+    patientId: "dd-demo-p2",
+    visitId: "dd-demo-v4",
+    amount: 400000,
+    method: "cash",
+    discount: 0,
+    at: now - 30 * 86400000,
+    by: "Qabul",
+    receiptNo: "R-DEBT",
+    ...demo,
+  });
+
+  const materials: [string, string, string, number, number, number][] = [
+    ["Анестетик Articaine", "ml", "anest", 40, 20, 8000],
+    ["Kompozit A2", "sht", "composite", 12, 6, 85000],
+    ["Kompozit A3", "sht", "composite", 4, 6, 85000],
+    ["Protraksiya ipi", "dona", "endo", 3, 5, 15000],
+    ["Tsirkoniy disk", "dona", "crown", 2, 2, 900000],
+    ["Gutta-percha", "paket", "endo", 8, 4, 60000],
+  ];
+  materials.forEach(([name, unit, category, qty, minQty, price], i) =>
+    push("inventory", `dd-demo-mat${i + 1}`, {
+      sku: `MAT-${1000 + i}`,
+      name,
+      unit,
+      category,
+      qty,
+      minQty,
+      price,
+      supplier: "DentaMed",
+      ...demo,
+    })
+  );
+  push("suppliers", "dd-demo-sup1", { name: "DentaMed", contact: "+998 71 111 22 33", ...demo });
+
+  // --- marketing ---
+  push("templatesMsg", "dd-demo-mt1", { name: "Tug'ilgan kun", channel: "telegram", text: "Assalomu alaykum, {name}! Tug'ilgan kuningiz bilan!", ...demo });
+  push("campaigns", "dd-demo-camp1", {
+    name: "May oyi tekshiruv",
+    filters: { tags: [], doctorId: "", lastVisitDays: 180, ageMin: 0, ageMax: 100, debt: false },
+    channels: ["telegram", "sms"],
+    templateId: "dd-demo-mt1",
+    status: "draft",
+    sends: [],
+    createdAt: now - 86400000,
+    ...demo,
+  });
+  push("messages", "dd-demo-msg1", {
+    patientId: "dd-demo-p1",
+    channel: "telegram",
+    direction: "out",
+    text: "Ertangi tashrifni eslatamiz: 09:00.",
+    at: now - 86400000,
+    by: "Qabul",
+    status: "sent",
+    ...demo,
+  });
+
+  for (const d of doctors) {
+    const revenue = visits.filter((v) => v.doctorId === d.id).reduce((s, v) => s + v.total, 0);
+    push("payroll", `dd-demo-pr-${d.id}`, {
+      doctorId: d.id,
+      period: todayStr.slice(0, 7),
+      base: 0,
+      percent: 30,
+      revenue,
+      total: Math.round(revenue * 0.3),
+      paidAt: null,
+      ...demo,
+    });
+  }
 }

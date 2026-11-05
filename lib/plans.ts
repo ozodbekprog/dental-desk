@@ -16,3 +16,65 @@ export const PLAN_LABELS: Record<string, string> = {
   clinic: "Klinika",
   network: "Tarmoq",
 };
+
+/** v2 module availability per plan. Start is a single-chair cabinet. */
+export const PLAN_MODULES: Record<string, readonly string[]> = {
+  trial: ["lab", "inventory", "marketing", "analytics", "documents", "chairs", "shifts"],
+  start: ["lab", "analytics", "documents", "chairs"],
+  clinic: [
+    "lab",
+    "inventory",
+    "marketing",
+    "analytics",
+    "documents",
+    "chairs",
+    "shifts",
+    "payroll",
+    "plans",
+    "toothHistory",
+  ],
+  network: [
+    "lab",
+    "inventory",
+    "marketing",
+    "analytics",
+    "documents",
+    "chairs",
+    "shifts",
+    "payroll",
+    "plans",
+    "toothHistory",
+    "branches",
+  ],
+};
+
+/** Collections gated behind a plan module; everything else is always available. */
+export const COLLECTION_MODULES: Record<string, string> = {
+  inventory: "inventory",
+  materialUse: "inventory",
+  suppliers: "inventory",
+  purchases: "inventory",
+  campaigns: "marketing",
+  outbox: "marketing",
+  payroll: "payroll",
+  plans: "plans",
+  toothHistory: "toothHistory",
+  labOrders: "lab",
+  labs: "lab",
+  documents: "documents",
+  chairs: "chairs",
+  shifts: "shifts",
+  branches: "branches",
+};
+
+export function planHasModule(plan: string, module: string): boolean {
+  const list = PLAN_MODULES[plan];
+  if (!list) return true;
+  return list.includes(module);
+}
+
+export function collectionAllowed(plan: string, collection: string): boolean {
+  const module = COLLECTION_MODULES[collection];
+  if (!module) return true;
+  return planHasModule(plan, module);
+}

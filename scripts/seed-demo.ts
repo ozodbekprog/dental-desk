@@ -1,5 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
+import { randomUUID } from "node:crypto";
 import { demoRecords } from "../lib/demo";
 
 const prisma = new PrismaClient();
@@ -36,7 +37,7 @@ async function main() {
         clinicId: clinic.id,
         name: "Demo Klinika",
         email: "demo@dentaldesk.uz",
-        passwordHash: await bcrypt.hash(crypto.randomUUID(), 10),
+        passwordHash: await bcrypt.hash(randomUUID(), 10),
         role: "owner",
       },
     });

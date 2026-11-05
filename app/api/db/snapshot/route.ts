@@ -1,5 +1,6 @@
 import { clinicContext } from "@/lib/api";
 import { prisma } from "@/lib/prisma";
+import { CALL_CENTER_HIDDEN } from "@/lib/util";
 
 export const runtime = "nodejs";
 
@@ -23,10 +24,9 @@ export async function GET() {
     (collections[row.collection] ||= {})[row.docId] = parsed;
   }
 
-  // The call centre books appointments; it must not read clinical records.
+  // The call centre books appointments; it must not read clinical, financial or HR records.
   if (ctx.session.role === "callcenter") {
-    delete collections.visits;
-    delete collections.history;
+    for (const name of CALL_CENTER_HIDDEN) delete collections[name];
     const patients = collections.patients;
     if (patients) {
       for (const id of Object.keys(patients)) {
@@ -53,6 +53,7 @@ export async function GET() {
     {
       version,
       writable: ctx.session.role !== "viewer",
+      plan: ctx.clinic.plan,
       collections,
     },
     { headers: { "Cache-Control": "no-store" } }

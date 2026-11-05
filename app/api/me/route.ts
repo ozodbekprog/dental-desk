@@ -1,4 +1,5 @@
 import { getSession, canWriteRole, clinicWritable } from "@/lib/auth";
+import { PLAN_MODULES } from "@/lib/plans";
 import { prisma } from "@/lib/prisma";
 
 export const runtime = "nodejs";
@@ -27,5 +28,6 @@ export async function GET() {
     trialEndsAt: clinic?.trialEndsAt?.toISOString() ?? null,
     canEdit: !!clinic,
     canWrite: !!clinic && canWriteRole(user.role) && clinicWritable(clinic),
+    modules: clinic ? PLAN_MODULES[clinic.plan] ?? PLAN_MODULES.network : [],
   });
 }

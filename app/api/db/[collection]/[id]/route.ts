@@ -1,8 +1,9 @@
 import { clinicContext } from "@/lib/api";
 import { canWriteRole, clinicWritable } from "@/lib/auth";
 import type { SessionUser } from "@/lib/jwt";
+import { collectionAllowed } from "@/lib/plans";
 import { prisma } from "@/lib/prisma";
-import { isCollection, jsonError } from "@/lib/util";
+import { CALL_CENTER_HIDDEN, isCollection, jsonError } from "@/lib/util";
 import type { Clinic } from "@prisma/client";
 
 export const runtime = "nodejs";
@@ -21,9 +22,12 @@ async function guard(collection: string) {
   if (!isCollection(collection)) return { error: jsonError("unknown_collection", 404) };
   const ctx = await clinicContext();
   if ("error" in ctx) return ctx;
-  // Clinical records stay out of reach for the call centre role.
-  if (ctx.session.role === "callcenter" && (collection === "visits" || collection === "history")) {
+  // Clinical, financial and HR records stay out of reach for the call centre role.
+  if (ctx.session.role === "callcenter" && CALL_CENTER_HIDDEN.includes(collection)) {
     return { error: jsonError("forbidden", 403) };
+  }
+  if (!collectionAllowed(ctx.clinic.plan, collection)) {
+    return { error: jsonError("plan_restricted", 403) };
   }
   return ctx;
 }
@@ -76,8 +80,12 @@ export async function PUT(req: Request, { params }: Params) {
       collection,
       docId,
       data: JSON.stringify(payload.data),
+      rev: 1,
     },
-    update: { data: JSON.stringify(payload.data) },
+    update: {
+      data: JSON.stringify(payload.data),
+      rev: { increment: 1 },
+    },
   });
   return Response.json({ ok: true });
 }
@@ -108,7 +116,7 @@ export async function PATCH(req: Request, { params }: Params) {
   const merged = { ...current, ...payload.data };
   await prisma.record.update({
     where: { id: row.id },
-    data: { data: JSON.stringify(merged) },
+    data: { data: JSON.stringify(merged), rev: { increment: 1 } },
   });
   return Response.json({ ok: true });
 }

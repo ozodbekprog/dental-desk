@@ -1,6 +1,6 @@
 {
-  "name": "dental-desk",
-  "version": "0.1.0",
+  "name": "dental-desk-v2",
+  "version": "2.0.0",
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
@@ -9,11 +9,11 @@
     "lint": "eslint",
     "db:migrate": "prisma migrate dev",
     "db:deploy": "prisma migrate deploy",
-    "seed:admin": "node --env-file=.env --import tsx scripts/create-super-admin.ts",
-    "seed:demo": "node --env-file=.env --import tsx scripts/seed-demo.ts",
+    "seed:admin": "node --import tsx --import ./scripts/with-env.mjs scripts/create-super-admin.ts",
+    "seed:demo": "node --import tsx --import ./scripts/with-env.mjs scripts/seed-demo.ts",
     "db:backup": "./scripts/backup-db.sh",
-    "check:e2e": "node --env-file=.env scripts/e2e-check.mjs",
-    "screenshots": "node --env-file=.env scripts/screenshots.mjs"
+    "check:e2e": "node --import ./scripts/with-env.mjs scripts/e2e-check.mjs",
+    "screenshots": "node --import ./scripts/with-env.mjs scripts/screenshots.mjs"
   },
   "dependencies": {
     "@prisma/client": "^6.19.3",

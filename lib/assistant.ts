@@ -379,9 +379,113 @@ function writeGuard(ctx: AssistantContext): string | null {
 async function putRecord(clinicId: string, collection: string, docId: string, data: Record<string, unknown>) {
   await prisma.record.upsert({
     where: { clinicId_collection_docId: { clinicId, collection, docId } },
-    create: { clinicId, collection, docId, data: JSON.stringify(data) },
-    update: { data: JSON.stringify(data) },
+    create: { clinicId, collection, docId, data: JSON.stringify(data), rev: 1 },
+    update: { data: JSON.stringify(data), rev: { increment: 1 } },
   });
+}
+
+async function listRecords(clinicId: string, collection: string): Promise<Record<string, unknown>[]> {
+  const rows = await prisma.record.findMany({ where: { clinicId, collection } });
+  return rows.map((row): Record<string, unknown> => {
+    let data: Record<string, unknown> = {};
+    try {
+      data = JSON.parse(row.data) as Record<string, unknown>;
+    } catch {
+      data = {};
+    }
+    return { id: row.docId, ...data };
+  });
+}
+
+function findPatient(ctx: AssistantContext, query: string) {
+  const q = norm(query);
+  if (!q) return undefined;
+  return (
+    ctx.data.patients.find((p) => norm(p.name) === q) ||
+    ctx.data.patients.find((p) => norm(p.name).includes(q)) ||
+    ctx.data.patients.find((p) => digits(p.phone || "").includes(digits(query)))
+  );
+}
+
+async function addPayment(ctx: AssistantContext, args: Record<string, unknown>) {
+  const denied = writeGuard(ctx);
+  if (denied) return { ok: false, error: denied };
+  const patient = findPatient(ctx, String(args.patient || ""));
+  if (!patient) return { ok: false, error: "Bemor topilmadi." };
+  const amount = Math.round(Number(args.amount) || 0);
+  if (amount <= 0) return { ok: false, error: "Summa noto'g'ri." };
+  const method = ["cash", "card", "transfer"].includes(String(args.method)) ? String(args.method) : "cash";
+
+  const id = "pay" + Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
+  await putRecord(ctx.clinic.id, "payments", id, {
+    patientId: patient.id,
+    patientName: patient.name,
+    amount,
+    method,
+    discount: 0,
+    at: Date.now(),
+    by: "AI",
+    receiptNo: id,
+  });
+  ctx.actions.push(`To'lov qabul qilindi: ${patient.name} — ${amount.toLocaleString("ru")} so'm`);
+  return { ok: true, paymentId: id, amount, method };
+}
+
+async function getLowStock(ctx: AssistantContext) {
+  const items = await listRecords(ctx.clinic.id, "inventory");
+  const low = items
+    .map((i) => ({ id: i.id, name: String(i.name ?? ""), qty: Number(i.qty) || 0, min: Number(i.minQty) || 0, unit: String(i.unit ?? "") }))
+    .filter((i) => i.qty <= i.min);
+  return { count: low.length, items: low.slice(0, 20) };
+}
+
+async function getPayroll(ctx: AssistantContext, period: string) {
+  const rows = await listRecords(ctx.clinic.id, "payroll");
+  const items = rows
+    .filter((r) => r.period === period)
+    .map((r) => {
+      const doctor = ctx.data.doctors.find((d) => d.id === r.doctorId);
+      return {
+        doctorId: r.doctorId,
+        doctor: doctor?.name ?? String(r.doctorId ?? ""),
+        revenue: Number(r.revenue) || 0,
+        total: Number(r.total) || 0,
+      };
+    });
+  return { period, items, total: items.reduce((s, i) => s + i.total, 0) };
+}
+
+async function createLabOrder(ctx: AssistantContext, args: Record<string, unknown>, today: Date) {
+  const denied = writeGuard(ctx);
+  if (denied) return { ok: false, error: denied };
+  const patient = findPatient(ctx, String(args.patient || ""));
+  if (!patient) return { ok: false, error: "Bemor topilmadi." };
+  const labs = await listRecords(ctx.clinic.id, "labs");
+  const wanted = String(args.lab || "").toLowerCase();
+  const lab = labs.find((l) => String(l.name ?? "").toLowerCase().includes(wanted)) || labs[0];
+  const dueDays = Math.max(1, Math.min(60, Number(args.dueInDays) || 7));
+
+  const id = "lab" + Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
+  await putRecord(ctx.clinic.id, "labOrders", id, {
+    patientId: patient.id,
+    patientName: patient.name,
+    labId: lab?.id ?? "",
+    labName: lab ? String(lab.name ?? "") : "",
+    work: String(args.work || ""),
+    tooth: Number(args.tooth) || null,
+    sentAt: ymd(today),
+    dueAt: ymd(addDays(today, dueDays)),
+    stages: [
+      { name: "Skan", status: "active" },
+      { name: "Modellashtirish", status: "pending" },
+      { name: "Ishlab chiqarish", status: "pending" },
+    ],
+    fee: Number(args.fee) || 0,
+    feeType: "fixed",
+    source: "assistant",
+  });
+  ctx.actions.push(`Laboratoriya buyurtmasi yaratildi: ${patient.name} — ${args.work}`);
+  return { ok: true, orderId: id };
 }
 
 export async function createPatient(
@@ -974,6 +1078,60 @@ const TOOLS = [
       },
     },
   },
+  {
+    type: "function",
+    function: {
+      name: "add_payment",
+      description: "Record a payment received from a patient (cash or card).",
+      parameters: {
+        type: "object",
+        properties: {
+          patient: { type: "string" },
+          amount: { type: "number", description: "Amount in so'm" },
+          method: { type: "string", enum: ["cash", "card", "transfer"] },
+        },
+        required: ["patient", "amount"],
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "get_low_stock",
+      description: "List inventory materials at or below their minimum quantity.",
+      parameters: { type: "object", properties: {} },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "get_payroll",
+      description: "Payroll totals per doctor for a month (YYYY-MM).",
+      parameters: {
+        type: "object",
+        properties: { period: { type: "string", description: "YYYY-MM" } },
+      },
+    },
+  },
+  {
+    type: "function",
+    function: {
+      name: "create_lab_order",
+      description: "Send a prosthetics work order to a laboratory for a patient.",
+      parameters: {
+        type: "object",
+        properties: {
+          patient: { type: "string" },
+          lab: { type: "string" },
+          work: { type: "string" },
+          tooth: { type: "number" },
+          dueInDays: { type: "number" },
+          fee: { type: "number" },
+        },
+        required: ["patient", "work"],
+      },
+    },
+  },
 ] as const;
 
 async function runTool(ctx: AssistantContext, name: string, args: Record<string, unknown>, today: Date) {
@@ -1006,6 +1164,14 @@ async function runTool(ctx: AssistantContext, name: string, args: Record<string,
         { patientName: String(args.patient || ""), date: args.date ? String(args.date) : undefined, status: String(args.status || "") },
         today
       );
+    case "add_payment":
+      return addPayment(ctx, args);
+    case "get_low_stock":
+      return getLowStock(ctx);
+    case "get_payroll":
+      return getPayroll(ctx, String(args.period || ymd(today).slice(0, 7)));
+    case "create_lab_order":
+      return createLabOrder(ctx, args, today);
     default:
       return { error: "unknown_tool" };
   }

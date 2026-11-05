@@ -61,9 +61,11 @@ model Record {
   collection String
   docId      String
   data       String
+  rev        Int      @default(1)
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
   @@unique([clinicId, collection, docId])
   @@index([clinicId, collection])
+  @@index([clinicId, updatedAt])
 }
