@@ -81,7 +81,7 @@
   css.textContent = [
     "#ddai-fab{position:fixed;right:20px;bottom:20px;z-index:900;display:flex;align-items:center;gap:9px;",
     "padding:11px 16px 11px 13px;border-radius:999px;border:1px solid var(--line,#d6e1e2);",
-    "background:var(--accent,#0c6a72);color:var(--accent-ink,#fff);font:700 13.5px/1 var(--font-body,'Onest',sans-serif);",
+    "background:var(--accent,#0c6a72);color:var(--accent-ink,#fff);font:700 13.5px/1 var(--font-body,'Inter',sans-serif);",
     "box-shadow:0 14px 34px -12px rgba(6,42,46,.55),0 2px 6px rgba(6,42,46,.18);cursor:pointer;",
     "transition:transform .16s ease,box-shadow .16s ease}",
     "#ddai-fab:hover{transform:translateY(-1px);box-shadow:0 18px 40px -12px rgba(6,42,46,.6)}",
@@ -367,6 +367,7 @@
   });
 
   setChips();
+  window.DD_ASSISTANT = { open: open, close: close };
 
   /* The app toggles language via documentElement[lang]; keep our labels in sync. */
   var observer = new MutationObserver(function () {

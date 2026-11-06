@@ -1,27 +1,26 @@
-/* Dental Desk SaaS adapter: exposes the artifact-style `claude.use()` API
-   on top of the clinic REST backend. The app itself stays untouched. */
+/* Dental Desk v2 adapter: exposes the artifact-style `claude.use()` API on top of
+   the clinic REST backend. Initial load is a snapshot, then only changed docs are
+   pulled through the delta feed /api/db/changes?since=<ms>. */
 (function () {
   "use strict";
 
   var COLLECTIONS = [
-    "doctors",
-    "patients",
-    "appointments",
-    "visits",
-    "slots",
-    "requests",
-    "reqstate",
-    "links",
-    "history",
-    "prices",
+    "doctors", "patients", "appointments", "visits", "slots", "requests", "reqstate", "links", "history", "prices",
+    /* v2 modules */
+    "chairs", "branches", "waitlist", "toothHistory", "diagnoses", "plans", "labOrders", "labs",
+    "templates", "documents", "campaigns", "messages", "msgTemplates", "outbox", "inventory",
+    "materialUse", "suppliers", "purchases", "payments", "payroll", "shifts", "audit", "files", "fileData",
   ];
 
   var store = {};
-  var version = null;
+  var since = 0;
+  var count = 0;
+  var dirtyExact = false;
   var loadedOnce = false;
   var inFlight = false;
   var dirty = false;
   var pollTimer = null;
+  var lastPull = 0;
   var listSubs = {};
   var docSubs = [];
 
@@ -29,8 +28,36 @@
     return fetch(url, Object.assign({ credentials: "same-origin" }, opts || {}));
   }
 
+  /* Offline cache: a cold start on a flaky network still shows the last data. */
+  var CACHE_KEY = "dd_v2_cache";
+  try {
+    var cached = localStorage.getItem(CACHE_KEY);
+    if (cached) {
+      var c = JSON.parse(cached);
+      if (c && c.store && c.since) { store = c.store; since = c.since; count = c.count || 0; }
+    }
+  } catch (e) {}
+  var cacheTimer = 0;
+  function persist() {
+    clearTimeout(cacheTimer);
+    cacheTimer = setTimeout(function () {
+      try {
+        localStorage.setItem(CACHE_KEY, JSON.stringify({ store: store, since: since, count: count }));
+      } catch (e) {
+        try { localStorage.removeItem(CACHE_KEY); } catch (x) {}
+      }
+    }, 400);
+  }
+
+  function names() {
+    var out = {};
+    Object.keys(store).forEach(function (k) { out[k] = true; });
+    COLLECTIONS.forEach(function (k) { out[k] = true; });
+    return Object.keys(out);
+  }
+
   function dispatch() {
-    COLLECTIONS.forEach(function (name) {
+    names().forEach(function (name) {
       var subs = listSubs[name] || [];
       if (!subs.length) return;
       var rows = store[name] || {};
@@ -61,75 +88,86 @@
     });
   }
 
-  function refresh(force) {
-    if (inFlight) {
-      dirty = true;
-      return;
-    }
-    inFlight = true;
+  function unauthorized(res) {
+    if (res.status === 401) { location.href = "/login"; return true; }
+    return false;
+  }
 
-    var precheck = force || !loadedOnce
-      ? Promise.resolve(true)
-      : request("/api/db/version").then(
-          function (res) {
-            if (res.status === 401) {
-              location.href = "/login";
-              return false;
-            }
-            if (!res.ok) return true;
-            return res.json().then(function (v) {
-              return v.version !== version;
-            });
-          },
-          function () {
-            return true;
-          }
-        );
-
-    precheck
-      .then(function (needed) {
-        if (!needed) return null;
-        return request("/api/db/snapshot").then(function (res) {
-          if (res.status === 401) {
-            location.href = "/login";
-            return null;
-          }
-          if (!res.ok) throw new Error("snapshot " + res.status);
-          return res.json();
-        });
-      })
-      .then(function (snap) {
-        if (!snap) return;
+  function pullSnapshot() {
+    return request("/api/db/snapshot").then(function (res) {
+      if (unauthorized(res)) return null;
+      if (!res.ok) throw new Error("snapshot " + res.status);
+      return res.json().then(function (snap) {
         store = snap.collections || {};
-        version = snap.version;
+        since = snap.cursor || 0;
+        count = 0;
+        Object.keys(store).forEach(function (k) { count += Object.keys(store[k]).length; });
+        dirtyExact = false;
         loadedOnce = true;
+        persist();
         dispatch();
-      })
+      });
+    });
+  }
+
+  /* Delta pull. Rev 0 marks a doc removed since `since`; a drop in the row count
+     also means deletions, so fall back to a full snapshot in that case. */
+  function pullChanges() {
+    if (!since || dirtyExact) return pullSnapshot();
+    return request("/api/db/changes?since=" + encodeURIComponent(since)).then(function (res) {
+      if (unauthorized(res)) return null;
+      if (!res.ok) throw new Error("changes " + res.status);
+      return res.json().then(function (feed) {
+        var cols = feed.collections || {}, revs = feed.revs || {};
+        Object.keys(cols).forEach(function (name) {
+          var bucket = (store[name] = store[name] || {});
+          Object.keys(cols[name]).forEach(function (id) { bucket[id] = cols[name][id]; });
+        });
+        Object.keys(revs).forEach(function (key) {
+          if (revs[key] !== 0) return;
+          var i = key.indexOf("/");
+          var bucket = store[key.slice(0, i)];
+          if (bucket) delete bucket[key.slice(i + 1)];
+        });
+        if (typeof feed.count === "number") {
+          if (count && feed.count < count) { dirtyExact = true; return pullSnapshot(); }
+          count = feed.count;
+        }
+        if (feed.cursor) since = feed.cursor;
+        else if (feed.maxUpdatedAt) since = feed.maxUpdatedAt;
+        persist();
+        dispatch();
+        return null;
+      });
+    });
+  }
+
+  function refresh(force) {
+    if (inFlight) { dirty = true; return; }
+    inFlight = true;
+    var p = !loadedOnce || force ? pullSnapshot() : pullChanges();
+    p.then(function () { lastPull = Date.now(); })
       .catch(function () {})
       .then(function () {
         inFlight = false;
         if (dirty) {
           dirty = false;
-          setTimeout(function () {
-            refresh(true);
-          }, 60);
+          setTimeout(function () { refresh(false); }, 80);
         }
       });
   }
 
   function refreshSoon() {
-    setTimeout(function () {
-      refresh(true);
-    }, 60);
+    setTimeout(function () { refresh(false); }, 80);
   }
 
   function ensurePolling() {
     if (pollTimer) return;
     pollTimer = setInterval(function () {
-      if (document.visibilityState === "hidden") return;
+      if (document.visibilityState === "hidden" && Date.now() - lastPull < 60000) return;
       refresh(false);
     }, 5000);
-    refresh(true);
+    refresh(false);
     window.addEventListener("focus", function () {
       refresh(false);
     });
@@ -143,8 +181,22 @@
     var opts = { method: method, headers: { "Content-Type": "application/json" } };
     if (method !== "DELETE") opts.body = JSON.stringify({ data: data });
 
+    /* Optimistic: show the new value right away and roll back if the server rejects it. */
+    var bucket = (store[collection] = store[collection] || {});
+    var had = Object.prototype.hasOwnProperty.call(bucket, id);
+    var before = bucket[id];
+    if (method === "DELETE") delete bucket[id];
+    else if (method === "PUT") bucket[id] = data;
+    else bucket[id] = Object.assign({}, had ? before : {}, data);
+    dispatch();
+    function rollback() {
+      if (had) bucket[id] = before; else delete bucket[id];
+      dispatch();
+    }
+
     return request(url, opts).then(function (res) {
       if (!res.ok) {
+        rollback();
         return res
           .json()
           .catch(function () {
@@ -160,6 +212,11 @@
       }
       refreshSoon();
       return true;
+    }, function () {
+      rollback();
+      var err = new Error("network");
+      err.code = "network";
+      throw err;
     });
   }
 
@@ -247,6 +304,8 @@
             clinicSlug: function () {
               return me.clinicSlug || "";
             },
+            plan: function () { return me.plan || ""; },
+            modules: function () { return me.modules || []; },
             canEdit: function () {
               return !!me.canEdit;
             },

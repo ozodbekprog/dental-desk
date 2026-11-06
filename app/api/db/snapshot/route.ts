@@ -46,12 +46,12 @@ export async function GET() {
     _count: true,
     _max: { updatedAt: true },
   });
-
-  const version = `${stats._count}:${stats._max.updatedAt?.getTime() ?? 0}`;
+  const cursor = stats._max.updatedAt?.getTime() ?? 0;
 
   return Response.json(
     {
-      version,
+      version: `${stats._count}:${cursor}`,
+      cursor,
       writable: ctx.session.role !== "viewer",
       plan: ctx.clinic.plan,
       collections,

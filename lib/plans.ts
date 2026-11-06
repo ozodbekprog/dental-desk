@@ -10,6 +10,19 @@ export function doctorSeatLimit(plan: string): number {
   return DOCTOR_SEATS[plan] ?? 5;
 }
 
+/** Hard caps on stored patient records; Infinity when the plan is unlimited. */
+const PATIENT_CAPS: Record<string, number> = {
+  trial: 50,
+  start: 300,
+  clinic: 3000,
+  network: Number.POSITIVE_INFINITY,
+};
+
+export function patientCap(plan: string): number {
+  return PATIENT_CAPS[plan] ?? 3000;
+}
+
+/** Which clinical collection holds what: used by documents and exams. */
 export const PLAN_LABELS: Record<string, string> = {
   trial: "Sinov",
   start: "Start",
@@ -19,8 +32,8 @@ export const PLAN_LABELS: Record<string, string> = {
 
 /** v2 module availability per plan. Start is a single-chair cabinet. */
 export const PLAN_MODULES: Record<string, readonly string[]> = {
-  trial: ["lab", "inventory", "marketing", "analytics", "documents", "chairs", "shifts"],
-  start: ["lab", "analytics", "documents", "chairs"],
+  trial: ["lab", "inventory", "marketing", "analytics", "documents", "chairs", "shifts", "waitlist"],
+  start: ["lab", "analytics", "documents", "chairs", "waitlist"],
   clinic: [
     "lab",
     "inventory",
@@ -32,6 +45,7 @@ export const PLAN_MODULES: Record<string, readonly string[]> = {
     "payroll",
     "plans",
     "toothHistory",
+    "waitlist",
   ],
   network: [
     "lab",
@@ -45,6 +59,7 @@ export const PLAN_MODULES: Record<string, readonly string[]> = {
     "plans",
     "toothHistory",
     "branches",
+    "waitlist",
   ],
 };
 

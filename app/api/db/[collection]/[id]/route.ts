@@ -1,7 +1,7 @@
 import { clinicContext } from "@/lib/api";
 import { canWriteRole, clinicWritable } from "@/lib/auth";
 import type { SessionUser } from "@/lib/jwt";
-import { collectionAllowed } from "@/lib/plans";
+import { collectionAllowed, patientCap } from "@/lib/plans";
 import { prisma } from "@/lib/prisma";
 import { CALL_CENTER_HIDDEN, isCollection, jsonError } from "@/lib/util";
 import type { Clinic } from "@prisma/client";
@@ -10,12 +10,12 @@ export const runtime = "nodejs";
 
 type Params = { params: Promise<{ collection: string; id: string }> };
 
-function readBody(body: unknown): { data: Record<string, unknown> } | null {
-  if (!body || typeof body !== "object") return null;
-  const data = (body as { data?: unknown }).data;
-  if (!data || typeof data !== "object" || Array.isArray(data)) return null;
-  if (JSON.stringify(data).length > 512 * 1024) return null;
-  return { data: data as Record<string, unknown> };
+function readBody(body: unknown, wrapped: boolean): { data: Record<string, unknown> } | null {
+  if (!body || typeof body !== "object" || Array.isArray(body)) return null;
+  const raw = wrapped ? (body as { data?: unknown }).data : body;
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null;
+  if (JSON.stringify(raw).length > 512 * 1024) return null;
+  return { data: raw as Record<string, unknown> };
 }
 
 async function guard(collection: string) {
@@ -63,10 +63,21 @@ export async function PUT(req: Request, { params }: Params) {
   const denied = writeDenied(ctx.session, ctx.clinic);
   if (denied) return denied;
 
-  const payload = readBody(await req.json().catch(() => null));
+  const body = await req.json().catch(() => null);
+  const payload = readBody(body, !!(body && typeof body === "object" && "data" in (body as object)));
   if (!payload) return jsonError("invalid_data");
 
   const docId = decodeURIComponent(id).slice(0, 200);
+  if (collection === "patients") {
+    const exists = await prisma.record.findUnique({
+      where: { clinicId_collection_docId: { clinicId: ctx.clinic.id, collection, docId } },
+      select: { id: true },
+    });
+    if (!exists) {
+      const count = await prisma.record.count({ where: { clinicId: ctx.clinic.id, collection } });
+      if (count >= patientCap(ctx.clinic.plan)) return jsonError("patient_limit", 403);
+    }
+  }
   await prisma.record.upsert({
     where: {
       clinicId_collection_docId: {
@@ -97,7 +108,8 @@ export async function PATCH(req: Request, { params }: Params) {
   const denied = writeDenied(ctx.session, ctx.clinic);
   if (denied) return denied;
 
-  const payload = readBody(await req.json().catch(() => null));
+  const patchBody = await req.json().catch(() => null);
+  const payload = readBody(patchBody, !!(patchBody && typeof patchBody === "object" && "data" in (patchBody as object)));
   if (!payload) return jsonError("invalid_data");
   const docId = decodeURIComponent(id).slice(0, 200);
 

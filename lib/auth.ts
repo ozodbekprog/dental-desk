@@ -20,11 +20,21 @@ export async function isSuperAdmin(): Promise<boolean> {
 }
 
 export function canWriteRole(role: string): boolean {
-  return ["owner", "admin", "doctor", "reception", "callcenter"].includes(role);
+  return ["owner", "admin", "branch_manager", "doctor", "reception", "callcenter", "accountant"].includes(role);
 }
 
 export function canManageRole(role: string): boolean {
-  return ["owner", "admin"].includes(role);
+  return ["owner", "admin", "branch_manager"].includes(role);
+}
+
+/** Clinical records (chart, visits, plans) are hidden from the call centre. */
+export function canSeeClinical(role: string): boolean {
+  return role !== "callcenter";
+}
+
+/** Money and HR: cashier, payroll, invoices. */
+export function canSeeMoney(role: string): boolean {
+  return ["owner", "admin", "branch_manager", "accountant", "reception"].includes(role);
 }
 
 export type ClinicState = {

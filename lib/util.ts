@@ -37,6 +37,7 @@ export const COLLECTIONS = [
   // v2 platform
   "audit",
   "files",
+  "fileData",
 ] as const;
 
 export type CollectionName = (typeof COLLECTIONS)[number];
@@ -53,6 +54,7 @@ export const CLINICAL_COLLECTIONS: readonly string[] = [
   "payroll",
   "materialUse",
   "audit",
+  "fileData",
 ];
 
 /** Collections that are never writable by the call-centre role either. */
