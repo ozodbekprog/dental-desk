@@ -2,8 +2,10 @@ import { chromium } from "playwright-core";
 import { PrismaClient } from "@prisma/client";
 import assert from "node:assert/strict";
 
-const base = "http://localhost:3100";
-const chrome = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
+const base = process.env.E2E_BASE || "http://localhost:3100";
+const chrome =
+  process.env.CHROME_PATH ||
+  (process.platform === "darwin" ? "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" : "/usr/bin/google-chrome");
 const results = [];
 const stamp = Date.now();
 
@@ -50,9 +52,11 @@ try {
 
   const snapshotA = async () => (await api(pageA, "/api/db/snapshot")).body;
   const before = await snapshotA();
-  assert.equal(Object.keys(before.collections.patients || {}).length, 10);
-  assert.equal(Object.keys(before.collections.appointments || {}).length, 8);
-  ok("Demo snapshot: 10 bemor, 8 qabul");
+  // earlier demo-clinic tests may have added patients, so compare against a floor + demo ids
+  const demoPats = Object.keys(before.collections.patients || {}).filter((id) => id.startsWith("dd-demo-p"));
+  assert.equal(demoPats.length, 10);
+  assert.equal(Object.keys(before.collections.appointments || {}).filter((id) => id.startsWith("dd-demo-")).length, 8);
+  ok("Demo snapshot: 10 demo bemor, 8 qabul");
 
   // in-app AI assistant drawer
   await pageA.click("#ddai-fab");
@@ -188,7 +192,7 @@ try {
   ok("Tasdiqlash bemor, navbat va slot yaratdi");
 
   /* ---------- A3. call centre role: queue only, no clinical records ---------- */
-  const ccEmail = `e2e-cc-${stamp}@test.uz`;
+  const ccEmail = `e2e-cc3-${stamp}@test.uz`;
   r = await api(pageA, "/api/staff", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -547,6 +551,92 @@ try {
   r = await api(pageB, "/api/admin/clinics");
   assert.equal(r.status, 403);
   ok("Klinika egasi admin API'ga kira olmaydi");
+
+  /* ---------- C3. v2 modules: gating, call-centre shield, change feed, outbox ---------- */
+  const putAs = (page, col, id, data) =>
+    api(page, `/api/db/${col}/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ data }),
+    });
+  const putB = (col, id, data) =>
+    api(pageB, `/api/db/${col}/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ data }),
+    });
+
+  // change feed returns only docs touched after the cursor
+  let feed = (await api(pageB, "/api/db/changes?since=0")).body;
+  const cursor = feed.cursor;
+  assert.ok(typeof cursor === "number", "changes cursor");
+  r = await putB("chairs", "e2e-chair-1", { name: "Kabinet 1", active: true });
+  assert.equal(r.status, 200);
+  feed = (await api(pageB, `/api/db/changes?since=${cursor}`)).body;
+  assert.ok(feed.collections.chairs && feed.collections.chairs["e2e-chair-1"], "delta contains new chair");
+  assert.equal(feed.collections.patients, undefined);
+  ok("Delta change feed faqat o'zgargan doclarni qaytaradi");
+
+  // Start plan: inventory is closed
+  await prisma.clinic.update({ where: { id: target.id }, data: { plan: "start" } });
+  r = await putB("inventory", "e2e-mat-1", { name: "Plomba", qty: 5, unit: "dona" });
+  assert.equal(r.status, 403);
+  assert.equal(r.body.error, "plan_restricted");
+  r = await putB("payroll", "e2e-py-1", { doctorId: docId, total: 1 });
+  assert.equal(r.status, 403);
+  ok("Start tarifida ombor va ish haqi yopiq (403 plan_restricted)");
+
+  await prisma.clinic.update({ where: { id: target.id }, data: { plan: "clinic" } });
+  r = await putB("inventory", "e2e-mat-1", { name: "Plomba", qty: 5, minQty: 10, unit: "dona" });
+  assert.equal(r.status, 200);
+  ok("Klinika tarifida ombor ochildi");
+
+  // call-centre role cannot read clinical or financial collections
+  const ccEmail2 = `e2e-cc3-${stamp}-b@test.uz`;
+  r = await api(pageB, "/api/staff", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name: "E2E Callmarkaz", email: ccEmail2, password: "call12345", role: "callcenter" }),
+  });
+  assert.equal(r.status, 200);
+  const pageCC2 = await (await browser.newContext()).newPage();
+  await pageCC2.goto(base + "/login");
+  r = await api(pageCC2, "/api/auth/login", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email: ccEmail2, password: "call12345" }),
+  });
+  assert.equal(r.status, 200);
+  for (const col of ["visits", "plans", "toothHistory", "payments", "payroll"]) {
+    r = await api(pageCC2, `/api/db/${col}/x`);
+    assert.equal(r.status, 403, `${col} hidden from call centre`);
+  }
+  const ccSnap2 = (await api(pageCC2, "/api/db/snapshot")).body;
+  for (const col of ["visits", "plans", "payments", "payroll", "toothHistory"]) {
+    assert.equal(ccSnap2.collections[col], undefined, `${col} missing from call-centre snapshot`);
+  }
+  assert.ok(ccSnap2.collections.patients, "call centre still sees patients");
+  ok("Call markaz klinik/moliya doclarini ko'rmaydi (GET 403 + snapshotdan yashirin)");
+
+  // outbox cron delivers queued messages (demo mode without provider keys)
+  r = await putAs(pageCC2, "outbox", "e2e-ob-1", { channel: "sms", to: "+998901112233", text: "Sinov", at: Date.now(), status: "queued" });
+  assert.equal(r.status, 200);
+  r = await api(pageCC2, "/api/cron/outbox", { method: "POST" });
+  assert.equal(r.status, 200);
+  assert.ok(r.body.sent + r.body.demo >= 1, "outbox processed");
+  const obDoc = (await api(pageCC2, "/api/db/outbox/e2e-ob-1")).body.data;
+  assert.ok(["sent", "demo"].includes(obDoc.status), "outbox status updated: " + obDoc.status);
+  ok("Outbox cron xabarni yubordi", obDoc.status);
+
+  // AI assistant knows the new collections
+  r = await api(pageB, "/api/assistant", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ messages: [{ role: "user", content: "omborda kam qoldiq" }] }),
+  });
+  assert.equal(r.status, 200);
+  assert.match(r.body.reply, /Plomba|kam qoldiq|yetarli/i);
+  ok("AI yordamchi ombor holatini biladi");
 
   /* ---------- D. trial expiry blocks writes ---------- */
   await prisma.clinic.update({

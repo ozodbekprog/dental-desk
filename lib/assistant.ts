@@ -942,6 +942,19 @@ export async function localAnswer(
       return { reply: statsReply(ctx, today), actions: ctx.actions.slice(before), mode: "local" };
     }
 
+    /* inventory */
+    if (/\b(ombor\w*|material\w*|qoldiq\w*|zapas\w*|stock|inventory|склад\w*|запас\w*|остат\w*)/.test(t)) {
+      const low = await getLowStock(ctx);
+      const lines = (low.items as Array<{ name: string; qty: number; unit: string; min: number }>).map(
+        (i) => `${i.name}: ${i.qty} ${i.unit || "dona"} (min ${i.min})`
+      );
+      return {
+        reply: low.count ? `Kam qoldiq (${low.count}):\n${lines.join("\n")}` : "Barcha materiallar yetarli.",
+        actions: ctx.actions.slice(before),
+        mode: "local",
+      };
+    }
+
     /* schedule */
     if (/\b(navbat\w*|qabul\w*|jadval\w*|schedule|appointment\w*|расписани\w*|при[её]м\w*)/.test(t)) {
       const date = parseDate(t) || ymd(today);

@@ -40,7 +40,7 @@ export async function POST(req: Request) {
   // local checks log in repeatedly from one address; the budget only guards the public instance
   if (process.env.NODE_ENV !== "production") return demoLogin();
 
-  const limit = hit(`demo:${clientIp(req)}`, 20, 60 * 60_000);
+  const limit = hit(`demo:${clientIp(req)}`, 400, 60 * 60_000);
   if (!limit.ok) return tooMany(limit.retryAfter);
   return demoLogin();
 }

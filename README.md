@@ -1,4 +1,4 @@
-# Dental Desk — klinikalar uchun bulutli qabul tizimi
+# Dental Desk v2 — klinikalar uchun to'liq boshqaruv tizimi
 
 Dental Desk — xususiy stomatologiya klinikalari uchun ko'p ijarachi (multi-tenant)
 SaaS: onlayn yozilish, qabul va call markaz navbati, qabul jadvali, bemor
@@ -51,7 +51,65 @@ Egasi va muallifi: **Ozodbek Xoshimov Xusanovich, Xoshimov Group** (2026).
   holati bilan cheklanadi.
 - **14 kunlik sinov** — karta talab qilinmaydi; sinov tugagach yozish yopiladi,
   o'qish saqlanadi.
-- **Tarif limitlari** — Start 1 shifokor, Klinika 5 shifokor, Tarmoq cheksiz.
+- **Tarif limitlari** — Start 1 shifokor, Klinika 5 shifokor, Tarmoq cheksiz;
+  modul darajasidagi cheklovlar `lib/plans.ts` da.
+
+### v2 da qo'shilgan modullar
+
+- **Kabinetlar (chairs) va smenalar** — kalendar kabinet bo'yicha, smena jadvali,
+  ish joyi; navbat ro'yxati (waitlist) bo'sh vaqtga birikadi.
+- **Ko'p filial** — filiallar, sidebar'dan filial tanlash, filial bo'yicha filtr.
+- **Bemor kartasi v2** — tablar: Asosiy, Tish, Tashriflar, Rejalar, Hisob-kitoblar,
+  Aloqa, Fayllar; teglar, anamnez, qarz, fayl biriktirish (drag & drop).
+- **Tish tarixi** — har tish bo'yicha muolajalar, sirtlar, kanal, izoh, rasm.
+- **Bolalar tish formulasi** — sut tishlari (FDI 51–85), aralash tishlash.
+- **Muolaja shablonlari** — tayyor shablonlar tashrifga avtomatik protseduralar beradi.
+- **ICD-10 katalogi** — diagnozni tashrifga biriktirish.
+- **Ko'p varianti davolash rejasi** — 2–3 variant, bosqichlar, narx, qabul qilish,
+  bajarilganini belgilash, chop etish; qabul qilingan variant tashrifga o'tadi.
+- **Laboratoriya** — lablar katalogi, buyurtmalar, bosqichlar, muddat nazorati,
+  texnik to'lovi (fiks/foiz).
+- **Marketing** — segment (teg, shifokor, oxirgi tashrif, yosh, qarz), kanal
+  (SMS/Telegram/WhatsApp/Email), shablon, progress, aloqa lenti, outbox.
+- **Analitika** — kassa, tushum, qarz, yuklama, xizmat bo'yicha tushum,
+  o'rtacha chek, davr filtri, SVG chartlar.
+- **Ombor** — materiallar, qoldiq, minimal qoldiq ogohlantirishi, sarf (qabuldan
+  avtomatik), shtrix-kod, qabul (purchase), ta'minotchilar.
+- **Kassa** — to'lov oynasi, chegirma (sabab bilan, ruxsat tekshiruvi), usul,
+  chek, qarz, balans.
+- **Ish haqi** — shifokor bo'yicha foiz/fiksa, davr, to'langanini belgilash.
+- **Hujjatlar** — 043/u forma, davolash rejasi, tashriflar xulosasi, chek;
+  chop etish, email/Telegramga yuborish (stub), saqlangan hujjatlar.
+- **Global qidiruv ⌘K** — bemor, tashrif, navbat, tez yozilish.
+- **Audit lenti** — kim, qaysi yozuvni, qanday o'zgartirgan.
+- **Vazifalar/aloqa lenti** — bemor bilan barcha xabarlar bir joyda.
+- **AI yordamchi v2** — reja, lab, kassa, ombor kam qoldiq, ish haqi, tish
+  tarixi tool'lari.
+- **PWA** — `manifest.webmanifest`, service worker, oflayn qobiq, mobil pastki tab.
+
+## 32Desk bilan taqqoslash
+
+| Funksiya | 32Desk | Dental Desk v2 |
+| --- | --- | --- |
+| Kalendar, check-in, call markaz | ✔ | ✔ |
+| Onlayn yozilish sahifasi | ✔ | ✔ `/b/<slug>` |
+| Bemor kartasi, tashriflar tarixi | ✔ | ✔ + 7 tab |
+| 3D tish xaritasi (32 tish) | — | ✔ FDI/Universal, bolalar tishlari |
+| Kabinetlar, smenalar, navbat (waitlist) | ✔ | ✔ |
+| Ko'p filial | ✔ | ✔ |
+| ICD-10, muolaja shablonlari | ✔ | ✔ |
+| 043 forma, hujjat shablonlari | ✔ | ✔ (chop etish → PDF) |
+| Ko'p varianti davolash rejasi | ✔ | ✔ |
+| Laboratoriya buyurtmalari | ✔ | ✔ |
+| Marketing (SMS/Telegram/WA/Email) | ✔ | ✔ + outbox stub (env bilan real) |
+| Analitika va hisobotlar | ✔ | ✔ |
+| Ombor va sarf | ✔ | ✔ |
+| Kassa, chegirmalar, chek | ✔ | ✔ |
+| Ish haqi | ✔ | ✔ |
+| Global qidiruv ⌘K | — | ✔ |
+| AI yordamchi | — | ✔ |
+| PWA / mobil | ✔ | ✔ |
+| Audit lenti | ✔ | ✔ |
 
 ## Tez boshlash
 
@@ -82,7 +140,11 @@ npm run dev                    # http://localhost:3000
 | `ADMIN_EMAIL` | Super-admin emaili (`seed:admin` uchun) |
 | `ADMIN_PASSWORD` | Super-admin paroli (`seed:admin` uchun) |
 | `DEMO_ENABLED` | `"true"` bo'lsa, demo tugmasi va demo login ochiq |
-| `CRON_SECRET` | `/api/cron/billing` uchun maxfiy kalit (Bearer yoki `?secret=`) |
+| `CRON_SECRET` | `/api/cron/billing` va `/api/cron/outbox` uchun maxfiy kalit (Bearer yoki `?secret=`) |
+| `TELEGRAM_BOT_TOKEN` | Ixtiyoriy: Telegram orqali xabar yuborish (kalitsiz — demo rejim) |
+| `SMS_API_URL`, `SMS_API_KEY` | Ixtiyoriy: SMS shlyuzi (POST `{to, text}` JSON) |
+| `WHATSAPP_TOKEN`, `WHATSAPP_PHONE_ID` | Ixtiyoriy: WhatsApp Cloud API |
+| `SMTP_API_URL` (+ `SMTP_TOKEN`, `SMTP_FROM`) | Ixtiyoriy: email yuborish endpointi |
 | `AI_API_KEY` | Ixtiyoriy: OpenAI-mos LLM kaliti (bo'lmasa lokal rejim) |
 | `AI_BASE_URL` | Ixtiyoriy: LLM endpoint, standart `https://api.openai.com/v1` |
 | `AI_MODEL` | Ixtiyoriy: model nomi, standart `gpt-4o-mini` |
@@ -106,8 +168,9 @@ Haqiqiy parollar faqat `.env` faylida saqlanadi va repoga qo'shilmaydi.
 | `npm run db:backup` | SQLite `.backup` + gzip, 14 kunlik retention |
 | `npm run seed:admin` | Super-admin yaratish/yangilash |
 | `npm run seed:demo` | Demo klinika va namuna yozuvlar |
-| `npm run check:e2e` | 35 ta endpoint/UI tekshiruvi (dev server kerak) |
+| `npm run check:e2e` | 41 ta endpoint/UI tekshiruvi (dev server kerak; `E2E_BASE` bilan manzil) |
 | `npm run screenshots` | Marketing skrinshotlarini yangilash |
+| Outbox cron | `POST /api/cron/outbox` (`CRON_SECRET`) — marketing xabarlarini yuboradi |
 
 ## Arxitektura qisqacha
 
@@ -115,17 +178,19 @@ Haqiqiy parollar faqat `.env` faylida saqlanadi va repoga qo'shilmaydi.
 app/                 Next.js sahifalar va API route'lar
   b/[slug]/          anonim onlayn yozilish sahifasi
   api/auth/*         signup, login, logout, demo
-  api/db/*           snapshot, version, collection CRUD
+  api/db/*           snapshot, changes (delta feed), version, collection CRUD
   api/public/*       klinika ma'lumoti, bo'sh slotlar, so'rov qabul qilish
   api/staff/*        xodimlar CRUD
   api/admin/*        super-admin klinikalar va hisob-fakturalar
   api/assistant      AI yordamchi (tool calling yoki lokal javob)
   api/cron/billing   obuna/sinov muddatini yopish (CRON_SECRET)
+  api/cron/outbox    marketing xabarlarini yuborish (CRON_SECRET yoki egasi)
   app/route.ts       content/app.html ni sessiya bilan uzatadi
 content/app.html     ilova qobig'i (prototipdan moslashtirilgan)
-public/app-assets/   adapter.js + assistant.js + three.min.js
+public/app-assets/   adapter.js (delta sync) + assistant.js + three.min.js + v2.css
+public/sw.js         PWA service worker (qobiq cache, oflayn sahifa)
 lib/                 prisma, jwt, auth, api guard, demo seed, plans,
-                     billing, assistant
+                     billing, assistant, channels (SMS/Telegram/Email/WA)
 prisma/schema.prisma Clinic, User, Record, Invoice
 middleware.ts        /app, /settings, /admin himoyasi
 ```
@@ -163,8 +228,10 @@ PostgreSQLga o'tish rejalashtirilgan (`docs/07-yol-xaritasi.md`).
   call markaz qo'ng'iroq qiladi. Telegram bot keyingi bosqichda.
 - AI yordamchi LLM kalitisiz lokal qoidalar bilan ishlaydi; murakkab erkin
   savollarga javob sifati kalit ulanganda yuqoriroq bo'ladi.
-- Bitta filial; ko'p filial va markaziy boshqaruv keyingi bosqichda.
-- SMS/Telegram eslatmalar yo'q.
+- SMS/Telegram/WhatsApp/Email yuborish provider kaliti qo'yilmasa demo rejimda
+  ishlaydi (outbox'da `demo` statusi).
+- Payme/Click avtoto'lovi UI darajasida; integratsiya keyingi bosqichda.
+- Filiallar bitta bazada; filiallar orasidagi sinxronizatsiya keyingi bosqichda.
 - SQLite bitta server uchun; yuqori yuklamada PostgreSQL tavsiya etiladi.
 
 ## Hujjatlar

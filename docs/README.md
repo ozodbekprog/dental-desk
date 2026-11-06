@@ -16,6 +16,10 @@ imzolashdan oldin yuridik matnlarni yurist bilan tekshiring.
 | 08 | [Demo skripti](08-demo-skript.md) | Sotuv menejeri |
 | 09 | [Ekspluatatsiya qo'llanmasi](09-ekspluatatsiya.md) | Server administratori |
 
+v2 o'zgarishlari: [CHANGELOG-v2.md](../CHANGELOG-v2.md). Yangi modullar
+(kabinetlar, reja, lab, marketing, ombor, kassa, ish haqi, analitika, hujjatlar)
+va PWA haqida README'ning "v2 da qo'shilgan modullar" bo'limiga qarang.
+
 ## Bir qarashda
 
 - Mahsulot: stomatologiya klinikasi uchun onlayn yozilish, qabul/call markaz

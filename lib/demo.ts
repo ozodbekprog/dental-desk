@@ -472,18 +472,33 @@ function seedV2(
   });
 
   // --- finance ---
+  const paidVisits = visits.filter((v) => v.patientId !== "dd-demo-p6").slice(0, 2);
   for (const v of visits) {
-    push("payments", `dd-demo-pay-${v.id}`, {
-      patientId: v.patientId,
-      visitId: v.id,
-      amount: v.total,
-      method: "cash",
-      discount: 0,
-      at: now - 3 * 86400000,
-      by: v.doctorName,
-      receiptNo: `R-${v.id.slice(-2).toUpperCase()}`,
-      ...demo,
-    });
+    if (paidVisits.includes(v)) {
+      push("payments", `dd-demo-pay-${v.id}`, {
+        patientId: v.patientId,
+        visitId: v.id,
+        amount: v.total,
+        method: "cash",
+        discount: 0,
+        at: now - 3 * 86400000,
+        by: v.doctorName,
+        receiptNo: `R-${v.id.slice(-2).toUpperCase()}`,
+        ...demo,
+      });
+    } else {
+      push("payments", `dd-demo-pay-${v.id}`, {
+        patientId: v.patientId,
+        visitId: null,
+        amount: v.total,
+        method: v.patientId === "dd-demo-p6" ? "card" : "cash",
+        discount: 0,
+        at: now - 3 * 86400000,
+        by: v.doctorName,
+        receiptNo: `R-${v.id.slice(-2).toUpperCase()}`,
+        ...demo,
+      });
+    }
   }
   push("payments", "dd-demo-pay-debt", {
     patientId: "dd-demo-p2",

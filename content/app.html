@@ -3018,16 +3018,19 @@ function uploadFiles(files, pid, visitId) {
 
 /* ================= charts: plan editor, cashier helpers, patient tabs ================= */
 function payTotal(pid) {
-  var total = 0, paid = 0, owed = 0;
+  var total = 0, paid = 0, visitDebt = 0, unlinked = 0, draftTotal = 0;
   patientVisits(pid).forEach(function (v) {
     var t = visitTotal(v), p = 0;
     state.payments.filter(function (x) { return x.visitId === v.id; }).forEach(function (x) { p += +x.amount || 0; });
     total += t; paid += p;
-    if (v.id === (ctx.draft && ctx.draft.id)) return;
-    if (paid < t) owed += t - p;
+    if (ctx.draft && v.id === ctx.draft.id) { draftTotal += t; return; }
+    if (p < t) visitDebt += t - p;
   });
-  state.payments.filter(function (x) { return x.patientId === pid && !x.visitId; }).forEach(function (x) { paid += +x.amount || 0; });
-  return { total: total, paid: paid, debt: Math.max(0, owed) };
+  state.payments.filter(function (x) { return x.patientId === pid && !x.visitId; }).forEach(function (x) { unlinked += +x.amount || 0; });
+  paid += unlinked;
+  var open = unlinked - draftTotal;
+  if (open < 0) visitDebt = Math.max(0, visitDebt + open);
+  return { total: total, paid: paid, debt: Math.max(0, visitDebt) };
 }
 function paidFor(visitId) { var s = 0; state.payments.forEach(function (x) { if (x.visitId === visitId) s += +x.amount || 0; }); return s; }
 function planTotal(plan) {
