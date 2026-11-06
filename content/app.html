@@ -2660,7 +2660,6 @@ function createViewer(host, cb) {
     }
     applyCam(); invalidate();
   }
-  function debugInfo() { return { kidBuilt: kidBuilt, dentition: dentition, kidUpper: kidBuilt ? kidJaws.upper.children.length : -1, kidVis: kidBuilt ? kidJaws.upper.visible : null, adultVis: jaws.upper.visible }; }
   function setData(info, selected) { sel = selected; ALL_TEETH.concat(KID_TEETH).forEach(function (f) { if (T[f]) T[f].info = info[f] || { status: "healthy", count: 0 }; }); paintAll(); invalidate(); }
   function setOptions(o) { for (var k in o) opts[k] = o[k]; applyOptions(); invalidate(); }
   function relabel() { ALL_TEETH.forEach(drawLabel); if (kidBuilt) KID_TEETH.forEach(drawLabel); invalidate(); }
@@ -2670,7 +2669,7 @@ function createViewer(host, cb) {
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { relabel(); });
   try { window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", function () { setTimeout(refresh, 40); }); } catch (e) { }
   try { new MutationObserver(function () { setTimeout(refresh, 40); }).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] }); } catch (e) { }
-  return { setData: setData, setView: setView, setOptions: setOptions, useDentition: setDentition, dentition: function () { return dentition; }, relabel: relabel, refresh: refresh, currentView: currentView, _debug: debugInfo, _scene: scene, _camera: camera };
+  return { setData: setData, setView: setView, setOptions: setOptions, useDentition: setDentition, dentition: function () { return dentition; }, relabel: relabel, refresh: refresh, currentView: currentView, _scene: scene, _camera: camera };
 }
 /* ================= toast / banner / theme / language ================= */
 var toastTimer = 0;
@@ -4584,7 +4583,6 @@ function ensureViewer() {
       }
     });
     viewer.setOptions({ labels: state.chart.labels, xray: state.chart.roots });
-    window.__viv = viewer._debug; window.__vuse = function (k) { viewer.useDentition(k); return viewer._debug(); };
   } catch (e) {
     viewerFailed = true; host.insertAdjacentHTML("beforeend", '<div class="gl-msg">' + esc(t("gl_unavailable")) + "</div>");
   }
@@ -4781,7 +4779,7 @@ function validateDraft(d) {
 }
 function saveVisit() {
   var d = state.chart.draft, err = validateDraft(d), p = ctx.p;
-  if (err) { var e = $("#panel-form .form-err"); if (e) e.textContent = err; return; }
+  if (err) { var e = $("#panel-form .form-err"); if (e) e.textContent = err; toast(err, true); return; }
   var doc = byId(state.doctors, d.doctorId), old = d.id ? byId(ctx.visits, d.id) : null;
   var data = old ? Object.assign({}, old) : { createdAt: Date.now() }; delete data.id;
   data.patientId = p.id; data.date = d.date; data.time = old ? (old.time || "") : (d.apptTime || new Date().toTimeString().slice(0, 5)); data.doctorId = d.doctorId; data.doctorName = doc ? doc.name : "";
@@ -5020,10 +5018,13 @@ function fillTpl() {
 }
 function applyTemplate(id) {
   var tpl = byId(state.templates, id), d = state.chart.draft; if (!tpl || !d) return;
+  var needsTooth = state.chart.tooth || "";
   (tpl.items || []).forEach(function (x) {
     var p = newProc(x.tooth || state.chart.tooth || "");
     p.type = x.proc; var pr = catPrice(d.doctorId, "procs", x.proc); p.price = pr ? String(pr) : "";
     p.note = x.note || ""; p.surfaces = []; p.tools = (DEFAULT_TOOLS[x.proc] || []).slice();
+    /* the free tooth picked on the model is the tooth being treated; a chosen plan row may override it */
+    if (!p.tooth && needsTooth) p.tooth = String(needsTooth);
     d.procs.push(p);
   });
   if (tpl.diagnosis) d.diagnosis = tpl.diagnosis;
