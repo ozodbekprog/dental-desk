@@ -89,7 +89,7 @@ export function planHasModule(plan: string, module: string): boolean {
 }
 
 export function collectionAllowed(plan: string, collection: string): boolean {
-  const module = COLLECTION_MODULES[collection];
-  if (!module) return true;
-  return planHasModule(plan, module);
+  const mod = COLLECTION_MODULES[collection];
+  if (!mod) return true;
+  return planHasModule(plan, mod);
 }

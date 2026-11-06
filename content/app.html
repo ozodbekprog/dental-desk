@@ -3075,10 +3075,10 @@ function procOptionsHtml(sel, noneLabel) {
 function openPlanEditor(pid, planId) {
   var plan = planId ? byId(state.plans, planId) : null;
   var m = { id: plan ? plan.id : uid("pl_"), patientId: pid, title: plan ? plan.title : t("pl_default_title"), variants: clone((plan && plan.variants) || []), acceptedVariant: plan ? (plan.acceptedVariant || null) : null, createdAt: plan ? (plan.createdAt || Date.now()) : Date.now() };
+  peModel = m;
   function emptyVariant(n) { return { id: uid("v_"), name: t("pl_variant") + " " + n, stages: [{ name: t("pl_stage") + " 1", items: [{ proc: "", tooth: "", qty: 1, price: 0, done: false, note: "" }] }] }; }
   if (!m.variants.length) { m.variants.push(emptyVariant("A")); m.variants.push(emptyVariant("B")); }
-  state.modal = { planState: m };
-  function body() {
+  function renderBody() {
     var h = '<div class="stack"><div class="field"><label class="lbl">' + esc(t("pl_title")) + '</label><input type="text" id="plTitle" value="' + esc(m.title) + '"></div><div class="planner">';
     m.variants.forEach(function (v, vi) {
       h += '<div class="plan-card' + (m.acceptedVariant === v.id ? " accepted" : "") + '"><div class="plan-name"><input type="text" data-pl="vname" data-vi="' + vi + '" value="' + esc(v.name) + '" style="flex:1"><button type="button" class="btn btn-sm btn-ghost" data-act="pl-rmv" data-vi="' + vi + '" aria-label="remove">&times;</button></div><div class="plan-total mono">' + esc(money(planVariantTotal(v))) + "</div>";
@@ -3086,7 +3086,7 @@ function openPlanEditor(pid, planId) {
         h += '<div class="plan-stage"><input type="text" data-pl="sname" data-vi="' + vi + '" data-si="' + si + '" value="' + esc(st.name) + '" style="min-height:30px;padding:4px 8px"></div>';
         st.items.forEach(function (it, ii) {
           var k = "data-vi=\"" + vi + "\" data-si=\"" + si + "\" data-ii=\"" + ii + "\"";
-          h += '<div class="row nowrap" style="gap:6px"><select data-pl="proc" ' + k + ' style="flex:2;min-width:0;min-height:32px;padding:4px 6px">' + procOptionsHtml(it.proc, t("pl_pick_proc")) + '</select>' + (it.proc && procNeedsTooth(it.proc) ? '<input type="text" inputmode="numeric" data-pl="tooth" ' + k + ' value="' + esc(it.tooth || "") + '" placeholder="FDI" style="width:62px;min-height:32px;padding:4px 6px">' : "") + '<input type="number" data-pl="price" ' + k + ' value="' + (+it.price || 0) + '" min="0" style="width:92px;min-height:32px;padding:4px 6px" class="mono"></div>';
+          h += '<div class="row nowrap" style="gap:6px"><select data-pl="proc" ' + k + ' style="flex:2;min-width:0;min-height:32px;padding:4px 6px">' + procOptionsHtml(it.proc, t("pl_pick_proc")) + '</select><input type="text" inputmode="numeric" data-pl="tooth" ' + k + ' value="' + esc(it.tooth || "") + '" placeholder="FDI" style="width:62px;min-height:32px;padding:4px 6px"' + (it.proc && procNeedsTooth(it.proc) ? "" : " hidden") + '>' + '<input type="number" data-pl="price" ' + k + ' value="' + (+it.price || 0) + '" min="0" style="width:92px;min-height:32px;padding:4px 6px" class="mono"></div>';
         });
         h += '<div class="row"><button type="button" class="btn btn-sm btn-ghost" data-act="pl-additem" data-vi="' + vi + '" data-si="' + si + '">' + esc(t("pl_add_item")) + '</button><button type="button" class="btn btn-sm btn-ghost" data-act="pl-rmstage" data-vi="' + vi + '" data-si="' + si + '">&minus; ' + esc(t("pl_rm_stage")) + "</button></div>";
       });
@@ -3095,9 +3095,9 @@ function openPlanEditor(pid, planId) {
     h += '</div><div class="row"><button type="button" class="btn" data-act="pl-addvar">+ ' + esc(t("pl_add_variant")) + "</button></div>" + ERR_HTML + "</div>";
     return h;
   }
-  function refresh() { $("#modalBody").innerHTML = body(); }
-  state.modal.plRefresh = refresh;
-  openModal(t("pl_editor"), body(), '<button type="button" class="btn" data-act="modal-close">' + esc(t("cancel")) + '</button><button type="submit" class="btn btn-primary">' + esc(t("save")) + "</button>", function () {
+  peBody = renderBody;
+  state.modal = { planEditor: true };
+  openModal(t("pl_editor"), renderBody(), '<button type="button" class="btn" data-act="modal-close">' + esc(t("cancel")) + '</button><button type="submit" class="btn btn-primary">' + esc(t("save")) + "</button>", function () {
     m.title = $("#plTitle") ? $("#plTitle").value.trim() : m.title;
     var clean = m.variants.map(function (v) { return { id: v.id, name: v.name, stages: v.stages.map(function (st) { return { name: st.name, items: st.items.filter(function (it) { return it.proc; }) }; }).filter(function (st) { return st.items.length; }) }; }).filter(function (v) { return v.stages.length; });
     if (!clean.length) { mErr(t("pl_empty")); return; }
@@ -3111,7 +3111,7 @@ function openPlanEditor(pid, planId) {
   }, null);
 }
 function planEditHandlers(e) {
-  var ms = state.modal && state.modal.planState; if (!ms) return false;
+  var ms = planEditor(); if (!ms) return false;
   var el = e.target, pl = el.dataset && el.dataset.pl;
   var vi = +(el.dataset && el.dataset.vi), si = +(el.dataset && el.dataset.si), ii = +(el.dataset && el.dataset.ii);
   var v = ms.variants[vi]; if (!v) return true;
@@ -3121,10 +3121,21 @@ function planEditHandlers(e) {
     var it = v.stages[si].items[ii]; it.proc = el.value;
     var pr = catPrice(state.doctorId === "all" ? (state.uid || "") : state.doctorId, "procs", el.value);
     if (pr) it.price = +pr;
-    state.modal.plRefresh(); return true;
+    /* re-rendering mid-change reverts the select; dependents are patched in place */
+    var row = el.closest(".row"), toothIn = row && row.querySelector('[data-pl="tooth"]'), priceIn = row && row.querySelector('[data-pl="price"]');
+    if (toothIn) toothIn.hidden = !(el.value && procNeedsTooth(el.value));
+    if (priceIn) priceIn.value = +it.price || 0;
+    var tot = el.closest(".plan-card") && el.closest(".plan-card").querySelector(".plan-total");
+    if (tot) tot.textContent = money(planVariantTotal(v));
+    return true;
   }
   if (pl === "tooth" && v.stages[si] && v.stages[si].items[ii]) { v.stages[si].items[ii].tooth = el.value.replace(/\D+/g, "").slice(0, 2); return true; }
-  if (pl === "price" && v.stages[si] && v.stages[si].items[ii]) { v.stages[si].items[ii].price = +el.value || 0; state.modal.plRefresh(); return true; }
+  if (pl === "price" && v.stages[si] && v.stages[si].items[ii]) {
+    v.stages[si].items[ii].price = +el.value || 0;
+    var card = el.closest(".plan-card"), pt = card && card.querySelector(".plan-total");
+    if (pt) pt.textContent = money(planVariantTotal(v));
+    return true;
+  }
   return false;
 }
 
@@ -3315,6 +3326,9 @@ function officeStatus() { var my = byId(state.doctors, state.uid); if (!my) retu
 function kpi(lbl, val, sub, ico, hero) {
   return '<div class="kpi' + (hero ? " hero" : "") + '"><div class="k-lbl">' + esc(lbl) + "</div>" + (ico ? '<span class="k-ico">' + ico + "</span>" : "") + '<div class="k-val">' + esc(val) + "</div>" + (sub ? '<div class="k-sub">' + esc(sub) + "</div>" : "") + "</div>";
 }
+function kpiId(id, lbl, val, sub, ico, hero) {
+  return '<div class="kpi' + (hero ? " hero" : "") + '"><div class="k-lbl">' + esc(lbl) + "</div>" + (ico ? '<span class="k-ico">' + ico + "</span>" : "") + '<div class="k-val" id="' + esc(id) + '">' + esc(val) + "</div>" + (sub ? '<div class="k-sub">' + esc(sub) + "</div>" : "") + "</div>";
+}
 function barChart(rows, fmt) {
   var max = 1; rows.forEach(function (r) { if (r.v > max) max = r.v; });
   return '<div class="chart-bars">' + rows.map(function (r, i) {
@@ -3483,7 +3497,7 @@ function openPayment(pid, visitId) {
     var visits = pay.pid ? patientVisits(pay.pid).filter(function (v) { return visitTotal(v) - paidFor(v.id) > 0; }).reverse() : [];
     var h = '<div class="grid2"><div class="field"><label class="lbl">' + esc(t("f_patient")) + '</label><select id="payPid">' + '<option value="">' + esc(t("f_choose")) + "</option>" + patients.map(function (p) { return '<option value="' + esc(p.id) + '"' + (p.id === pay.pid ? " selected" : "") + ">" + esc(p.name) + "</option>"; }).join("") + '</select></div>' +
       '<div class="field"><label class="lbl">' + esc(t("cash_visit")) + '</label><select id="payVisit"><option value="">' + esc(t("whole_mouth")) + "</option>" + visits.map(function (v) { return '<option value="' + esc(v.id) + '"' + (v.id === pay.visitId ? " selected" : "") + ">" + esc(fmtShort(v.date)) + " · " + esc(money(visitTotal(v) - paidFor(v.id))) + "</option>"; }).join("") + "</select></div></div>" +
-      '<div class="receipt"><div class="r-row"><span>" + esc(t("cash_debt")) + "</span><b>" + esc(money(owes)) + "</b></div><div class="r-row"><span>" + esc(t("cash_discount")) + "</span><b>" + esc(pay.discount || 0) + "%</b></div><div class="r-row r-total"><span>' + esc(t("cash_to_pay")) + "</span><b>" + esc(money(Math.round(owes * (1 - (pay.discount || 0) / 100)))) + "</b></div></div>" +
+      '<div class="receipt"><div class="r-row"><span>' + esc(t("cash_debt")) + '</span><b>' + esc(money(owes)) + '</b></div><div class="r-row"><span>' + esc(t("cash_discount")) + '</span><b>' + esc(pay.discount || 0) + '%</b></div><div class="r-row r-total"><span>' + esc(t("cash_to_pay")) + "</span><b>" + esc(money(Math.round(owes * (1 - (pay.discount || 0) / 100)))) + "</b></div></div>" +
       '<div class="field"><label class="lbl">' + esc(t("cash_amount")) + '</label><input type="number" id="payAmount" min="0" value="' + (pay.amount !== "" ? pay.amount : Math.round(owes * (1 - (pay.discount || 0) / 100))) + '"></div>' +
       '<div class="field"><span class="lbl">' + esc(t("cash_discount")) + '</span><div class="opts">' + [0, 5, 10, 15, 20].map(function (d) { return '<button type="button" class="opt" data-act="pay-disc" data-v="' + d + '" aria-pressed="' + (pay.discount === d) + '">' + d + '%</button>'; }).join("") + '</div><input type="text" id="payReason" placeholder="' + esc(t("cash_discount_reason")) + '" value="' + esc(pay.reason) + '"></div>' +
       '<div class="field"><span class="lbl">' + esc(t("cash_method")) + '</span><div class="opts">' + ["cash", "card", "transfer"].map(function (m) { return '<button type="button" class="opt" data-act="pay-method" data-v="' + m + '" aria-pressed="' + (pay.method === m) + '">' + esc(t("m_" + m)) + "</button>"; }).join("") + "</div></div>" + ERR_HTML;
@@ -3698,11 +3712,12 @@ function renderPayroll() {
     var rec = state.payroll.filter(function (p) { return p.doctorId === d.id && inRange(p.period || from, from, to); })[0] || {};
     var pct = rec.percent != null ? +rec.percent : 30, base = +rec.base || 0;
     var total = Math.round(rev * pct / 100 + base);
-    return { d: d, visits: vs.length, rev: rev, pct: pct, base: base, total: total, rec: rec };
+    var row = { d: d, visits: vs.length, rev: rev, pct: pct, base: base, total: total, rec: rec };
+    return row;
   });
   var sum = rows.reduce(function (s, r) { return s + r.total; }, 0);
   var h = '<div class="page-head"><div><h1>' + esc(t("nav_payroll")) + '</h1><p class="sub">' + esc(t("py_sub")) + '</p></div><div class="actions"><input type="date" id="pyFrom" value="' + esc(from) + '"><input type="date" id="pyTo" value="' + esc(to) + '">' + (canWrite() ? '<button class="btn btn-primary" data-act="py-save">' + esc(t("py_save")) + "</button>" : "") + "</div></div>";
-  h += '<div class="kpis">' + kpi(t("py_total"), money(sum), t("py_period", { a: from, b: to }), ICO.wallet, true) + kpi(t("py_doctors"), rows.length, "", ICO.staff) + kpi(t("an_revenue"), money(rows.reduce(function (s, r) { return s + r.rev; }, 0)), "", ICO.chart) + "</div>";
+  h += '<div class="kpis">' + kpiId("pySum", t("py_total"), money(sum), t("py_period", { a: from, b: to }), ICO.wallet, true) + kpi(t("py_doctors"), rows.length, "", ICO.staff) + kpi(t("an_revenue"), money(rows.reduce(function (s, r) { return s + r.rev; }, 0)), "", ICO.chart) + "</div>";
   state.pyRows = rows;
   h += '<div class="tbl-wrap" style="margin-top:14px"><table class="tbl"><thead><tr><th>' + esc(t("doctor")) + "</th><th>" + esc(t("visits_label")) + '</th><th class="r">' + esc(t("an_revenue")) + '</th><th>' + esc(t("py_percent")) + "</th><th>" + esc(t("py_base")) + '</th><th class="r">' + esc(t("py_total")) + '</th><th class="r">' + esc(t("py_paid")) + "</th></tr></thead><tbody>" + rows.map(function (r, i) {
     return '<tr><td><b>' + esc(r.d.name) + '</b></td><td class="mono">' + r.visits + '</td><td class="r mono">' + esc(money(r.rev)) + '</td><td><input type="number" min="0" max="100" data-py="pct" data-i="' + i + '" value="' + r.pct + '" style="width:80px;min-height:32px;padding:4px 8px" ' + (canWrite() ? "" : "disabled") + "></td><td><input type=\"number\" min=\"0\" data-py=\"base\" data-i=\"" + i + '" value="' + r.base + '" style="width:110px;min-height:32px;padding:4px 8px" ' + (canWrite() ? "" : "disabled") + '></td><td class="r mono"><b>' + esc(money(r.total)) + '</b></td><td class="r"><button class="btn btn-sm' + (r.rec.paidAt ? " btn-primary" : "") + '" data-act="py-pay" data-i="' + i + '"' + (canWrite() ? "" : " disabled") + ">" + esc(r.rec.paidAt ? t("py_paid_on", { d: fmtShort(ymd(new Date(r.rec.paidAt))) }) : t("py_mark_paid")) + "</button></td></tr>";
@@ -4288,13 +4303,16 @@ var lastFocus = null;
 function openModal(title, bodyHtml, footHtml, onSubmit, onOpen) {
   lastFocus = document.activeElement;
   $("#modalTitle").textContent = title; $("#modalBody").innerHTML = bodyHtml; $("#modalFoot").innerHTML = footHtml;
-  state.modal = { onSubmit: onSubmit };
+  /* keep metadata a caller attached to state.modal before opening */
+  state.modal = Object.assign(state.modal && !state.modal.onSubmit ? state.modal : {}, { onSubmit: onSubmit });
   $("#modal").hidden = false;
   if (onOpen) onOpen();
   var f = $("#modalBody input:not([type=hidden]):not([type=radio]):not([type=checkbox]), #modalBody select");
   if (f && !f.closest("[hidden]")) setTimeout(function () { f.focus(); }, 30);
 }
 function closeModal() {
+  if (state.modal && state.modal.onClose) { try { state.modal.onClose(); } catch (x) { } }
+  if (state.modal && state.modal.planEditor) peDrop();
   $("#modal").hidden = true; state.modal = null; $("#modalBody").innerHTML = ""; $("#modalFoot").innerHTML = "";
   if (lastFocus && lastFocus.focus) { try { lastFocus.focus(); } catch (e) { } }
 }
@@ -5092,34 +5110,35 @@ function delPlan(id) {
     state.confirmPlan = id; toast(t("click_again_remove"), true); setTimeout(function () { if (state.confirmPlan === id) state.confirmPlan = null; }, 3500);
   }
 }
-function planToVisit(planId, vid) {
-  var pl = planById(planId); if (!pl) return;
-  var v = (pl.variants || []).filter(function (x) { return x.id === vid; })[0]; if (!v) return;
-  var items = [];
-  (v.stages || []).forEach(function (st) { (st.items || []).forEach(function (it) { if (!it.done) items.push(it); }); });
-  if (!items.length) { toast(t("pl_nothing_todo"), true); return; }
-  patch("plans", planId, { visitedAt: Date.now() }).then(function () { });
-  if (state.route.name !== "chart" || state.route.id !== pl.patientId) { go("chart", pl.patientId, "form"); }
-  setTimeout(function () {
-    if (!state.chart.draft) startFreshVisit(pl.patientId);
-    var d = state.chart.draft;
-    items.forEach(function (it) {
-      var p = newProc(it.tooth || "");
-      p.type = it.proc; p.price = it.price != null ? String(it.price) : ""; p.note = it.note || "";
-      p.tools = (DEFAULT_TOOLS[it.proc] || []).slice();
-      d.procs.push(p);
-    });
-    d.diagnosis = d.diagnosis || ""; d.planId = planId;
-    persistDraft(); state.chart.tab = "form"; renderChartParts(); toast(t("pl_from_plan", { n: items.length }));
-  }, 80);
+/* copied so Cancel discards edits; only Save writes it back */
+var peModel = null, peBody = null;
+function planEditor() { return peModel; }
+function peDrop() { peModel = null; peBody = null; }
+function peSync() {
+  var m = planEditor(); if (!m) return;
+  var title = $("#plTitle"); if (title) m.title = title.value;
+  Array.prototype.forEach.call(document.querySelectorAll("#modalBody [data-pl]"), function (el) {
+    var vi = +el.dataset.vi, si = +el.dataset.si, ii = +el.dataset.ii, v = m.variants[vi];
+    if (!v) return;
+    var pl = el.dataset.pl;
+    if (pl === "vname") { v.name = el.value; return; }
+    var it = v.stages[si] && v.stages[si].items[ii];
+    if (pl === "sname") { v.stages[si].name = el.value; return; }
+    if (!it) return;
+    if (pl === "proc") it.proc = el.value;
+    else if (pl === "tooth") it.tooth = el.value.replace(/\D+/g, "").slice(0, 2);
+    else if (pl === "price") it.price = +el.value || 0;
+  });
 }
-function planEditor() { return state.modal && state.modal.planState; }
-function plAddItem(vi, si) { var m = planEditor(); if (!m || !m.variants[vi] || !m.variants[vi].stages[si]) return; m.variants[vi].stages[si].items.push({ proc: "", tooth: "", qty: 1, price: 0, done: false, note: "" }); state.modal.plRefresh(); }
-function plRmStage(vi, si) { var m = planEditor(); if (!m || !m.variants[vi]) return; var st = m.variants[vi].stages; if (st.length <= 1) { toast(t("err_empty"), true); return; } st.splice(si, 1); state.modal.plRefresh(); }
-function plAddStage(vi) { var m = planEditor(); if (!m || !m.variants[vi]) return; m.variants[vi].stages.push({ name: t("pl_stage") + " " + (m.variants[vi].stages.length + 1), items: [{ proc: "", tooth: "", qty: 1, price: 0, done: false, note: "" }] }); state.modal.plRefresh(); }
-function plAccept(vi) { var m = planEditor(); if (!m) return; var v = m.variants[vi]; if (!v) return; m.acceptedVariant = m.acceptedVariant === v.id ? null : v.id; state.modal.plRefresh(); }
-function plAddVariant() { var m = planEditor(); if (!m) return; var n = String.fromCharCode(65 + m.variants.length); m.variants.push({ id: uid("v_"), name: t("pl_variant") + " " + n, stages: [{ name: t("pl_stage") + " 1", items: [{ proc: "", tooth: "", qty: 1, price: 0, done: false, note: "" }] }] }); state.modal.plRefresh(); }
-function plRemoveVariant(vi) { var m = planEditor(); if (!m) return; if (m.variants.length <= 1) { toast(t("err_empty"), true); return; } var id = m.variants[vi].id; m.variants.splice(vi, 1); if (m.acceptedVariant === id) m.acceptedVariant = null; state.modal.plRefresh(); }
+/* only #modalBody is swapped: replacing the whole body would swallow the click that triggered it */
+function peRender() { peSync(); var box = $("#modalBody"); if (box && peBody) box.innerHTML = peBody(); }
+function peHandle(e) { return planEditHandlers(e); }
+function plAddItem(vi, si) { var m = planEditor(); if (!m || !m.variants[vi] || !m.variants[vi].stages[si]) return; m.variants[vi].stages[si].items.push({ proc: "", tooth: "", qty: 1, price: 0, done: false, note: "" }); peRender(); }
+function plRmStage(vi, si) { var m = planEditor(); if (!m || !m.variants[vi]) return; var st = m.variants[vi].stages; if (st.length <= 1) { toast(t("err_empty"), true); return; } st.splice(si, 1); peRender(); }
+function plAddStage(vi) { var m = planEditor(); if (!m || !m.variants[vi]) return; m.variants[vi].stages.push({ name: t("pl_stage") + " " + (m.variants[vi].stages.length + 1), items: [{ proc: "", tooth: "", qty: 1, price: 0, done: false, note: "" }] }); peRender(); }
+function plAccept(vi) { var m = planEditor(); if (!m) return; var v = m.variants[vi]; if (!v) return; m.acceptedVariant = m.acceptedVariant === v.id ? null : v.id; peRender(); }
+function plAddVariant() { var m = planEditor(); if (!m) return; var n = String.fromCharCode(65 + m.variants.length); m.variants.push({ id: uid("v_"), name: t("pl_variant") + " " + n, stages: [{ name: t("pl_stage") + " 1", items: [{ proc: "", tooth: "", qty: 1, price: 0, done: false, note: "" }] }] }); peRender(); }
+function plRemoveVariant(vi) { var m = planEditor(); if (!m) return; if (m.variants.length <= 1) { toast(t("err_empty"), true); return; } var id = m.variants[vi].id; m.variants.splice(vi, 1); if (m.acceptedVariant === id) m.acceptedVariant = null; peRender(); }
 
 function cashFilter(v) { state.cashFilter = v; renderCashier(); }
 function invSearch(v) { state.invSearch = v; renderInventory(); }
@@ -5340,9 +5359,9 @@ document.addEventListener("input", function (e) {
   if (el.id === "cashSearch") { state.cashSearch = el.value; renderCashier(); var cs = $("#cashSearch"); if (cs) { cs.focus(); try { cs.setSelectionRange(cs.value.length, cs.value.length); } catch (x) { } } return; }
   if (el.id === "invSearch") { state.invSearch = el.value; renderInventory(); var iv = $("#invSearch"); if (iv) { iv.focus(); try { iv.setSelectionRange(iv.value.length, iv.value.length); } catch (x) { } } return; }
   if (el.id === "mkName" || el.id === "mkText") { var mc = state.modal && state.modal.campaign; if (mc && el.id === "mkText") mc.template = el.value; return; }
-  if (el.dataset && el.dataset.pl && planEditHandlers(e)) return;
+  if (el.dataset && el.dataset.pl && peHandle(e)) return;
   if (el.dataset && el.dataset.tpl && state.modal && state.modal.tplItems) { var tpi = state.modal.tplItems[+el.dataset.j]; if (tpi) tpi[el.dataset.tpl] = el.value; return; }
-  if (el.dataset && el.dataset.py) { var pyi = +(el.dataset.i || 0), pyr = payrollRows()[pyi]; if (pyr) { var pv = Math.max(0, +el.value || 0); pyr[el.dataset.py] = pv; pyr.total = Math.round(pyr.rev * pyr.pct / 100 + pyr.base); var tot = $("#pySum"); if (tot) tot.textContent = money(payrollRows().reduce(function (a, r) { return a + r.total; }, 0)); } return; }
+  if (el.dataset && el.dataset.py) { var pyi = +(el.dataset.i || 0), pyr = payrollRows()[pyi]; if (pyr) { var pv = Math.max(0, +el.value || 0); pyr[el.dataset.py] = pv; pyr.total = Math.round(pyr.rev * pyr.pct / 100 + pyr.base); var tot = $("#pySum"); if (tot) tot.textContent = money(payrollRows().reduce(function (a, r) { return a + r.total; }, 0)); var tr = el.closest("tr"); if (tr) { var cell = tr.children[5]; if (cell) cell.textContent = money(pyr.total); } } return; }
   if (el.id === "qSearch") { state.qSearch = el.value; renderRequests(); var qs = $("#qSearch"); if (qs) { qs.focus(); try { qs.setSelectionRange(qs.value.length, qs.value.length); } catch (x) { } } return; }
   if (el.id === "pkSearch") { $("#pkResults").innerHTML = pickerResultsHtml(el.value); return; }
   if (el.dataset && el.dataset.priceKind) {
@@ -5368,9 +5387,16 @@ document.addEventListener("change", function (e) {
   if (el.id === "anTo") { state.anTo = el.value; renderAnalytics(); return; }
   if (el.id === "pyFrom") { state.pyFrom = el.value; state.pyRows = []; renderPayroll(); return; }
   if (el.id === "pyTo") { state.pyTo = el.value; state.pyRows = []; renderPayroll(); return; }
-  if (el.dataset && el.dataset.pl) { if (planEditHandlers(e)) return; }
+  if (el.dataset && el.dataset.pl) { if (peHandle(e)) return; }
   if (el.dataset && el.dataset.cmp) { var c0 = state.modal && state.modal.campaign; if (!c0) return; var k = el.dataset.cmp; if (k === "last") c0.filters.lastDays = el.value; else if (k === "tag") c0.filters.tag = el.value || null; else if (k === "doc") c0.filters.doctorId = el.value || null; else if (k === "debt" || k === "bday") c0.filters[k === "debt" ? "debt" : "birthday"] = el.checked; if (state.modal.cmpRefresh) state.modal.cmpRefresh(); return; }
   if (el.dataset && el.dataset.cmpAge) { var c1 = state.modal && state.modal.campaign; if (!c1) return; c1.filters[el.dataset.cmpAge === "min" ? "ageMin" : "ageMax"] = +el.value || 0; if (state.modal.cmpRefresh) state.modal.cmpRefresh(); return; }
+  if (el.id === "payPid" || el.id === "payVisit") {
+    var ps = payState(); if (!ps) return;
+    if (el.id === "payPid") { ps.pid = el.value; ps.visitId = ""; }
+    else ps.visitId = el.value;
+    ps.amount = ""; ps.reason = $("#payReason") ? $("#payReason").value : ps.reason;
+    state.modal.payRefresh(); return;
+  }
   if (el.id === "dayPick") { if (el.value) { state.date = el.value; renderSchedule(); } return; }
   if (el.id === "cfDate") { var cf0 = state.modal && state.modal.cf; if (cf0) { cf0.date = el.value; if (!slotFits(cf0.time, cf0.duration, busyCells(cf0.doctorId, cf0.date, cf0.id))) cf0.time = firstFree(cf0.doctorId, cf0.date, cf0.duration, cf0.id, true); cfRefresh(); } return; }
   if (el.name === "pmode") { var nw = el.value === "new"; $("#apNew").hidden = !nw; $("#apExisting").hidden = nw; return; }
