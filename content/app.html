@@ -5468,5 +5468,8 @@ function boot() {
   }, function () { state.noDb = true; renderAll(); });
 }
 window.addEventListener("pagehide", function () { if (viewer && viewer.dispose) viewer.dispose(); });
+if ("serviceWorker" in navigator && (location.protocol === "https:" || /^(localhost|127\.0\.0\.1)$/.test(location.hostname))) {
+  window.addEventListener("load", function () { navigator.serviceWorker.register("/sw.js").catch(function () { }); });
+}
 boot();
 })();</script><script src="/app-assets/assistant.js"></script></body></html>
