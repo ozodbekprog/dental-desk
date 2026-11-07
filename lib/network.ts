@@ -171,7 +171,7 @@ function doctorCards(profiles: DoctorWithClinics[], priceMap: Map<string, number
       rating: Math.round(profile.ratingAvg * 10) / 10,
       ratingCount: profile.ratingCount,
       priceFrom: clinicPrice || profile.priceFrom,
-      place: place ? place.name : profile.address,
+      place: place ? place.name : "Mustaqil qabul",
       address: place ? place.address : profile.address,
       mapUrl: place ? place.mapUrl : profile.mapUrl,
       phone: place ? place.phone : profile.phone,

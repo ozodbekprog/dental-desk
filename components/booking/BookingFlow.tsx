@@ -673,22 +673,22 @@ export function BookingFlow({ doctor }: { doctor: DoctorDetail }) {
                 <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-muted">
                   Tanlovingiz
                 </p>
-                <div className="mt-1.5 grid gap-1">
-                  <div className="flex justify-between gap-3">
-                    <span className="text-muted">Joy</span>
-                    <span className="truncate font-semibold text-ink">
+                <div className="mt-1.5 grid min-w-0 gap-1">
+                  <div className="flex min-w-0 justify-between gap-3">
+                    <span className="shrink-0 text-muted">Joy</span>
+                    <span className="min-w-0 truncate text-right font-semibold text-ink">
                       {placeName || "Tanlanmagan"}
                     </span>
                   </div>
-                  <div className="flex justify-between gap-3">
-                    <span className="text-muted">Kun</span>
-                    <span className="font-semibold text-ink">
+                  <div className="flex min-w-0 justify-between gap-3">
+                    <span className="shrink-0 text-muted">Kun</span>
+                    <span className="min-w-0 truncate text-right font-semibold text-ink">
                       {date ? formatDay(date) : "Tanlanmagan"}
                     </span>
                   </div>
-                  <div className="flex justify-between gap-3">
-                    <span className="text-muted">Vaqt</span>
-                    <span className="dd-mono font-semibold text-accent">
+                  <div className="flex min-w-0 justify-between gap-3">
+                    <span className="shrink-0 text-muted">Vaqt</span>
+                    <span className="dd-mono min-w-0 truncate text-right font-semibold text-accent">
                       {time || "Tanlanmagan"}
                     </span>
                   </div>
