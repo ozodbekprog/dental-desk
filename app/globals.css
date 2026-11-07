@@ -125,3 +125,59 @@ body {
   background-image: radial-gradient(rgba(12, 106, 114, 0.08) 1px, transparent 1px);
   background-size: 18px 18px;
 }
+
+@keyframes dd-rise {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.dd-rise {
+  animation: dd-rise 0.75s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.dd-rise-1 {
+  animation-delay: 0.08s;
+}
+
+.dd-rise-2 {
+  animation-delay: 0.16s;
+}
+
+.dd-rise-3 {
+  animation-delay: 0.24s;
+}
+
+.dd-rise-4 {
+  animation-delay: 0.32s;
+}
+
+.dd-lift {
+  transition:
+    transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.35s ease;
+}
+
+.dd-lift:hover {
+  transform: translateY(-4px);
+  border-color: var(--color-line-strong);
+  box-shadow: 0 30px 60px -42px rgba(9, 56, 60, 0.55);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dd-rise {
+    animation: none;
+  }
+
+  .dd-lift,
+  .dd-lift:hover {
+    transition: none;
+    transform: none;
+  }
+}

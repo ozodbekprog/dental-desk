@@ -13,7 +13,8 @@ import { ClinicCardView } from "@/components/network/ClinicCard";
 import { Avatar } from "@/components/network/Avatar";
 import { Stars } from "@/components/network/Stars";
 import { StarIcon } from "@/components/network/icons";
-import { formatPrice, formatReviewDate } from "@/components/network/format";
+import { SmileScene3D } from "@/components/network/SmileScene3D";
+import { formatReviewDate } from "@/components/network/format";
 
 export const dynamic = "force-dynamic";
 
@@ -95,18 +96,21 @@ export default async function HomePage() {
       <main className="flex-1">
         <section className="relative overflow-hidden border-b border-line bg-surface">
           <div className="dd-noise absolute inset-0 opacity-60" />
+          <div className="absolute inset-y-0 right-0 w-2/3 bg-[radial-gradient(ellipse_at_72%_38%,rgba(12,106,114,0.13),transparent_62%)]" />
           <div className="absolute -right-40 top-10 h-96 w-96 rounded-full bg-accent/5 blur-2xl" />
-          <div className="relative mx-auto grid max-w-6xl gap-12 px-4 pb-14 pt-12 sm:px-6 lg:grid-cols-[1.05fr_0.95fr] lg:items-center lg:pb-20 lg:pt-16">
+          <div className="relative mx-auto grid max-w-6xl gap-12 px-4 pb-14 pt-12 sm:px-6 lg:grid-cols-[1.02fr_0.98fr] lg:items-center lg:pb-20 lg:pt-16">
             <div>
-              <span className="inline-flex items-center gap-2 rounded-full border border-accent/25 bg-accent-soft px-3.5 py-1.5 text-xs font-semibold text-accent">
+              <span className="dd-rise inline-flex items-center gap-2 rounded-full border border-accent/25 bg-accent-soft px-3.5 py-1.5 text-xs font-semibold text-accent">
                 <span className="h-1.5 w-1.5 rounded-full bg-accent" />
                 Stomatologlar tarmog&apos;i · Toshkent
               </span>
-              <h1 className="dd-display mt-5 text-4xl font-extrabold leading-[1.04] text-ink sm:text-5xl lg:text-[3.4rem]">
+              <h1 className="dd-display dd-rise dd-rise-1 mt-5 text-4xl font-extrabold leading-[1.02] text-ink sm:text-5xl lg:text-[3.55rem]">
                 Shifokoringizni toping.{" "}
-                <span className="text-accent">Qabulga bir daqiqada yoziling.</span>
+                <span className="bg-gradient-to-r from-accent via-[#12838b] to-[#2fa9b0] bg-clip-text text-transparent">
+                  Qabulga bir daqiqada yoziling.
+                </span>
               </h1>
-              <p className="mt-5 max-w-xl text-[1.05rem] leading-relaxed text-muted">
+              <p className="dd-rise dd-rise-2 mt-5 max-w-xl text-[1.05rem] leading-relaxed text-muted">
                 Klinika va mustaqil stomatologlar bir joyda: mutaxassislik, narx, reyting va
                 bo&apos;sh vaqt. Akkaunt ochish shart emas — telefon raqam va qabul sababi yetarli.
               </p>
@@ -114,7 +118,7 @@ export default async function HomePage() {
               <form
                 action="/shifokorlar"
                 method="get"
-                className="mt-7 rounded-2xl border border-line-strong bg-surface p-2 shadow-[0_20px_50px_-30px_rgba(9,56,60,0.45)] sm:flex sm:items-center"
+                className="dd-rise dd-rise-3 mt-7 rounded-2xl border border-line-strong bg-surface p-2 shadow-[0_20px_50px_-30px_rgba(9,56,60,0.45)] sm:flex sm:items-center"
               >
                 <label className="flex min-w-0 flex-1 items-center gap-2.5 px-3 py-2">
                   <span className="sr-only">Shifokor yoki xizmat</span>
@@ -164,7 +168,7 @@ export default async function HomePage() {
                 </button>
               </form>
 
-              <div className="mt-4 flex flex-wrap items-center gap-2 text-xs">
+              <div className="dd-rise dd-rise-3 mt-4 flex flex-wrap items-center gap-2 text-xs">
                 <span className="font-semibold text-muted">Ko&apos;p tanlanadi:</span>
                 {SPECIALTIES.slice(0, 4).map((item) => (
                   <Link
@@ -177,7 +181,7 @@ export default async function HomePage() {
                 ))}
               </div>
 
-              <dl className="mt-8 grid grid-cols-3 gap-3 border-t border-line pt-6 text-sm">
+              <dl className="dd-rise dd-rise-4 mt-8 grid grid-cols-3 gap-3 border-t border-line pt-6 text-sm">
                 <div>
                   <dt className="dd-display text-2xl font-extrabold text-ink">{doctors.length}</dt>
                   <dd className="mt-0.5 text-xs text-muted">shifokor profili</dd>
@@ -196,93 +200,43 @@ export default async function HomePage() {
               </dl>
             </div>
 
-            <div className="relative mx-auto w-full max-w-[420px] lg:mx-0">
-              <div className="absolute -inset-5 rounded-[36px] bg-accent/5" aria-hidden="true" />
-              <div className="dd-card relative overflow-hidden rounded-[26px] border-line-strong shadow-[0_30px_80px_-40px_rgba(9,56,60,0.55)]">
-                <div className="flex items-center justify-between gap-2 border-b border-line bg-surface-2 px-5 py-3">
-                  <span className="inline-flex items-center gap-2 text-xs font-bold text-ok">
-                    <span className="h-2 w-2 rounded-full bg-ok" />
-                    Qabul tasdiqlandi
-                  </span>
-                  <span className="dd-mono text-[11px] text-muted">DD-2041</span>
-                </div>
-                <div className="p-5">
-                  {heroDoctor ? (
-                    <div className="flex items-center gap-3">
-                      <Avatar name={heroDoctor.name} photoUrl={heroDoctor.photoUrl} size="md" />
-                      <div className="min-w-0">
-                        <p className="dd-display truncate text-lg font-bold text-ink">
+            <div className="dd-rise dd-rise-2 relative mx-auto w-full max-w-[500px] lg:mx-0">
+              <div
+                className="absolute -inset-8 rounded-[54px] bg-[radial-gradient(ellipse_at_center,rgba(12,106,114,0.16),transparent_68%)] blur-2xl"
+                aria-hidden="true"
+              />
+              <SmileScene3D className="relative" />
+
+              <div className="relative z-10 mt-4 flex items-center gap-3 rounded-2xl border border-line-strong bg-surface px-4 py-3.5 shadow-[0_24px_60px_-38px_rgba(9,56,60,0.55)] sm:px-5">
+                {heroDoctor ? (
+                  <>
+                    <Avatar name={heroDoctor.name} photoUrl={heroDoctor.photoUrl} size="md" />
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <p className="dd-display truncate text-sm font-bold text-ink">
                           {heroDoctor.name}
                         </p>
-                        <p className="text-sm text-accent">{heroDoctor.specialtyLabel}</p>
-                        <p className="mt-0.5 inline-flex items-center gap-1.5 text-xs text-muted">
-                          <StarIcon className="h-3.5 w-3.5 text-gold" />
-                          {heroDoctor.rating > 0 ? heroDoctor.rating.toFixed(1) : "Yangi"} ·{" "}
-                          {formatPrice(heroDoctor.priceFrom)}
-                        </p>
+                        <span className="ml-auto inline-flex shrink-0 items-center gap-1.5 rounded-full border border-ok/25 bg-ok/10 px-2 py-0.5 text-[10px] font-semibold text-ok">
+                          <span className="h-1.5 w-1.5 rounded-full bg-ok" />
+                          Tasdiqlandi
+                        </span>
                       </div>
-                    </div>
-                  ) : (
-                    <p className="text-sm text-muted">Shifokor profili tez orada qo&apos;shiladi.</p>
-                  )}
-
-                  <div className="mt-4 grid grid-cols-2 gap-2.5">
-                    <div className="rounded-xl border border-line bg-surface-2/70 px-3 py-2.5">
-                      <p className="text-[10px] font-bold uppercase tracking-wide text-muted">Kun</p>
-                      <p className="dd-display mt-0.5 text-base font-extrabold text-ink">
-                        Dush, 9-noyabr
+                      <p className="truncate text-[11px] text-muted">
+                        {heroDoctor.specialtyLabel} · Dush, 9-noyabr ·{" "}
+                        <span className="dd-mono font-semibold text-ink">09:00</span>
+                      </p>
+                      <p className="truncate text-[11px] text-muted">
+                        {heroDoctor.address || "Manzil tasdiqlangach ko'rinadi"}
                       </p>
                     </div>
-                    <div className="rounded-xl border border-line bg-surface-2/70 px-3 py-2.5">
-                      <p className="text-[10px] font-bold uppercase tracking-wide text-muted">
-                        Vaqt
-                      </p>
-                      <p className="dd-mono mt-0.5 text-base font-extrabold text-ink">09:00</p>
-                    </div>
-                  </div>
-
-                  <div className="mt-2.5 rounded-xl border border-line bg-surface-2/70 px-3 py-2.5">
-                    <p className="text-[10px] font-bold uppercase tracking-wide text-muted">
-                      Qabul manzili
-                    </p>
-                    <p className="mt-0.5 text-sm font-semibold text-ink">
-                      {heroDoctor?.address || "Manzil tasdiqlangandan keyin ochiladi"}
-                    </p>
-                  </div>
-
-                  <ol className="mt-4 space-y-2.5 text-xs">
-                    {["So'rov yuborildi", "Shifokor tasdiqladi", "Vaqt va manzil ochildi"].map(
-                      (step, index) => (
-                        <li key={step} className="flex items-center gap-2.5">
-                          <span
-                            className={`grid h-5 w-5 place-items-center rounded-full ${
-                              index < 2 ? "bg-ok text-white" : "bg-accent text-white"
-                            }`}
-                          >
-                            <svg
-                              width="11"
-                              height="11"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="3"
-                              aria-hidden="true"
-                            >
-                              <path d="m5 12 5 5L20 7" />
-                            </svg>
-                          </span>
-                          <span className={index < 2 ? "text-ink-soft" : "font-semibold text-ink"}>
-                            {step}
-                          </span>
-                        </li>
-                      )
-                    )}
-                  </ol>
-                </div>
-                <div className="border-t border-line bg-surface-2/60 px-5 py-2.5 text-center text-[11px] text-muted">
-                  Ko&apos;rinish namunasi · holat havolasi orqali kuzatiladi
-                </div>
+                  </>
+                ) : (
+                  <p className="text-sm text-muted">Shifokor profili tez orada qo&apos;shiladi.</p>
+                )}
               </div>
+              <p className="mt-2 text-center text-[10px] text-muted">
+                Ko&apos;rinish namunasi · aniq vaqt va manzil shifokor tasdiqlagach ochiladi
+              </p>
             </div>
           </div>
         </section>
@@ -308,7 +262,9 @@ export default async function HomePage() {
             {topDoctors.length ? (
               <div className="mt-7 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {topDoctors.map((doctor) => (
-                  <DoctorCardView key={doctor.id} doctor={doctor} />
+                  <div key={doctor.id} className="dd-lift rounded-[20px]">
+                    <DoctorCardView doctor={doctor} />
+                  </div>
                 ))}
               </div>
             ) : (
@@ -365,7 +321,7 @@ export default async function HomePage() {
                   ),
                 },
               ].map((step) => (
-                <div key={step.n} className="dd-card relative p-6">
+                <div key={step.n} className="dd-card dd-lift relative p-6">
                   <span className="dd-mono absolute right-5 top-5 text-xs font-semibold text-line-strong">
                     {step.n}
                   </span>
@@ -518,7 +474,9 @@ export default async function HomePage() {
             </div>
             <div className="mt-7 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {clinics.slice(0, 2).map((clinic) => (
-                <ClinicCardView key={clinic.id} clinic={clinic} />
+                <div key={clinic.id} className="dd-lift rounded-[20px]">
+                  <ClinicCardView clinic={clinic} />
+                </div>
               ))}
               <div className="flex flex-col justify-between rounded-[20px] border border-dashed border-line-strong bg-surface-2/50 p-5">
                 <div>
@@ -576,7 +534,7 @@ export default async function HomePage() {
               </div>
               <div className="mt-7 grid gap-4 md:grid-cols-3">
                 {reviews.map((review) => (
-                  <figure key={review.id} className="dd-card flex flex-col p-5">
+                  <figure key={review.id} className="dd-card dd-lift flex flex-col p-5">
                     <Stars value={review.rating} />
                     <blockquote className="mt-3 flex-1 text-sm leading-relaxed text-ink-soft">
                       “{review.comment}”
