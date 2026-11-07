@@ -1,10 +1,15 @@
-# Dental Desk v2 — klinikalar uchun to'liq boshqaruv tizimi
+# Dental Desk v3 — stomatologlar tarmog'i va klinika tizimi
 
-Dental Desk — xususiy stomatologiya klinikalari uchun ko'p ijarachi (multi-tenant)
-SaaS: onlayn yozilish, qabul va call markaz navbati, qabul jadvali, bemor
-kartalari, tashriflar tarixi, 3D tish xaritasi, xodimlar boshqaruvi,
-hisob-fakturalar va ilova ichidagi AI yordamchi bitta tizimda. Interfeys
-o'zbek, rus va ingliz tillarida.
+Dental Desk — Toshkentdagi stomatologlar va klinikalarni birlashtiruvchi
+tarmoq: bemor shifokorni topadi, narx va reytingni ko'radi, bo'sh vaqtni tanlab
+**akkauntsiz** yoziladi. Vaqt va manzil faqat shifokor/qabulxona tasdiqlagach
+ko'rinadi. Bemor kabinetida barcha klinikalardagi tashriflar va 3D tish tarixi
+bir joyda.
+
+Klinikalar uchun esa to'liq ko'p ijarachi (multi-tenant) SaaS: qabul jadvali,
+bemor kartalari, tashriflar tarixi, 3D tish xaritasi, xodimlar boshqaruvi,
+hisob-fakturalar va ilova ichidagi AI yordamchi. Interfeys o'zbek, rus va ingliz
+tillarida.
 
 Egasi va muallifi: **Ozodbek Xoshimov Xusanovich, Xoshimov Group** (2026).
 
@@ -106,7 +111,14 @@ Egasi va muallifi: **Ozodbek Xoshimov Xusanovich, Xoshimov Group** (2026).
 - **Qabul davomiyligi** — shifokor qabulni +15/−15 daqiqa uzaytiradi yoki
   qisqartiradi; keyingi band vaqt bilan to'qnashuv bloklanadi.
 - **Reyting** — shifokor kartasi va profilida o'rtacha baho va sharhlar ko'rsatiladi
-  (`DoctorReview`; demo sharhlar `seed:network` bilan qo'shiladi).
+  (`DoctorReview`). Bemor faqat o'zi **o'tgan va tasdiqlangan** qabulni 1–5 yulduz
+  bilan baholay oladi (bronlar bo'limida); takroriy sharh bloklanadi, o'rtacha
+  baho avtomatik qayta hisoblanadi.
+- **Yagona bosh sahifa va navigatsiya** — `/` tarmoq vitrinasi: qidiruv, top
+  shifokorlar, tasdiqlash namunasi, 3D kabinet reklamasi, klinikalar, sharhlar va
+  FAQ. Klinika SaaS sahifasi `/klinika-uchun` ga ko'chirilgan.
+- **SEO** — `sitemap.xml` (shifokor va klinika sahifalari bilan), `robots.txt`,
+  Open Graph metama'lumotlari, brenddagi 404 sahifasi.
 
 Tarmoq ma'lumotlarini tayyorlash: `npm run seed:network` (demo klinika shifokorlari
 bilan bog'lanadi va mustaqil `doktor@demo.uz` profilini yaratadi; parol
@@ -161,6 +173,7 @@ npm run dev                    # http://localhost:3000
 | Kalit | Tavsif |
 | --- | --- |
 | `DATABASE_URL` | SQLite yo'li, masalan `file:./dev.db` (prisma papkasiga nisbatan) |
+| `NEXT_PUBLIC_SITE_URL` | Ommaviy manzil (sitemap, robots, Open Graph), masalan `https://dentaldesk.uz` |
 | `AUTH_SECRET` | JWT imzolash kaliti, kamida 32 bayt |
 | `ADMIN_EMAIL` | Super-admin emaili (`seed:admin` uchun) |
 | `ADMIN_PASSWORD` | Super-admin paroli (`seed:admin` uchun) |
@@ -193,6 +206,7 @@ Haqiqiy parollar faqat `.env` faylida saqlanadi va repoga qo'shilmaydi.
 | `npm run db:backup` | SQLite `.backup` + gzip, 14 kunlik retention |
 | `npm run seed:admin` | Super-admin yaratish/yangilash |
 | `npm run seed:demo` | Demo klinika va namuna yozuvlar |
+| `npm run seed:network` | Tarmoq demo ma'lumotlari: shifokor profillari, bog'lanishlar, sharhlar |
 | `npm run check:e2e` | 41 ta endpoint/UI tekshiruvi (dev server kerak; `E2E_BASE` bilan manzil) |
 | `npm run screenshots` | Marketing skrinshotlarini yangilash |
 | Outbox cron | `POST /api/cron/outbox` (`CRON_SECRET`) — marketing xabarlarini yuboradi |
@@ -201,6 +215,13 @@ Haqiqiy parollar faqat `.env` faylida saqlanadi va repoga qo'shilmaydi.
 
 ```
 app/                 Next.js sahifalar va API route'lar
+  page.tsx           tarmoq bosh sahifasi (qidiruv, top shifokorlar, sharhlar)
+  shifokorlar/       global shifokor katalogi va profili
+  klinikalar/        klinika katalogi va sahifasi
+  bron/              akkauntsiz bron va holat sahifasi
+  kabinet/           bemor kabineti (OTP, 3D tish tarixi, sharhlar)
+  doktor/            mustaqil shifokor kabineti
+  klinika-uchun/     klinikalar uchun SaaS landing
   b/[slug]/          anonim onlayn yozilish sahifasi
   api/auth/*         signup, login, logout, demo
   api/db/*           snapshot, changes (delta feed), version, collection CRUD

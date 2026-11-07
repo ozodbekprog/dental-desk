@@ -328,6 +328,43 @@ export async function listClinics(): Promise<ClinicCard[]> {
     });
 }
 
+export type HomeReview = {
+  id: string;
+  rating: number;
+  comment: string;
+  createdAt: string;
+  doctor: { id: string; name: string; specialtyLabel: string };
+};
+
+export async function listRecentReviews(take = 4): Promise<HomeReview[]> {
+  const rows = await prisma.doctorReview.findMany({
+    where: { status: "published", comment: { not: "" } },
+    orderBy: { createdAt: "desc" },
+    take: Math.min(Math.max(take * 2, 2), 20),
+    select: {
+      id: true,
+      rating: true,
+      comment: true,
+      createdAt: true,
+      doctor: { select: { id: true, name: true, specialty: true, isPublic: true, status: true } },
+    },
+  });
+  return rows
+    .filter((row) => row.doctor.isPublic && row.doctor.status === "active")
+    .slice(0, take)
+    .map((row) => ({
+      id: row.id,
+      rating: row.rating,
+      comment: row.comment,
+      createdAt: row.createdAt.toISOString(),
+      doctor: {
+        id: row.doctor.id,
+        name: row.doctor.name,
+        specialtyLabel: SPECIALTY_LABELS[row.doctor.specialty] || row.doctor.specialty,
+      },
+    }));
+}
+
 export type SlotResult = {
   days: string[];
   today: string;

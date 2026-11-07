@@ -22,10 +22,13 @@ const plexMono = IBM_Plex_Mono({
   weight: ["400", "500", "600"],
 });
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://dentaldesk.uz";
+
 export const metadata: Metadata = {
-  title: "Dental Desk — stomatologiya klinikasi uchun boshqaruv tizimi",
+  metadataBase: new URL(siteUrl),
+  title: "Dental Desk — stomatologlar tarmog'i",
   description:
-    "Qabul jadvali, bemor kartalari, 3D tish xaritasi va tashriflar tarixi — bitta tizimda. O'zbek, rus va ingliz tillarida. 14 kun bepul.",
+    "Toshkentdagi stomatologlar va klinikalar: shifokor toping, bo'sh vaqtni tanlang va onlayn yoziling. Tasdiqlangach manzil va vaqt ko'rinadi. 3D tish tarixi bemor kabinetida.",
   authors: [{ name: "Ozodbek Xoshimov Xusanovich", url: "https://t.me/oz4vka" }],
   manifest: "/manifest.webmanifest",
   applicationName: "Dental Desk",
@@ -35,14 +38,31 @@ export const metadata: Metadata = {
   creator: "Xoshimov Group",
   publisher: "Xoshimov Group",
   keywords: [
-    "stomatologiya",
-    "dental CRM",
-    "klinika boshqaruvi",
-    "qabul jadvali",
-    "bemor kartasi",
+    "stomatolog",
+    "tish shifokori",
+    "stomatologiya klinikasi",
+    "onlayn qabul",
+    "Toshkent",
+    "3D tish xaritasi",
     "Dental Desk",
     "O'zbekiston",
   ],
+  openGraph: {
+    type: "website",
+    locale: "uz_UZ",
+    url: "/",
+    siteName: "Dental Desk",
+    title: "Dental Desk — stomatologlar tarmog'i",
+    description:
+      "Shifokoringizni toping va qabulga bir daqiqada yoziling. Vaqt va manzil shifokor tasdiqlagach ko'rinadi.",
+    images: [{ url: "/app-assets/icon-512.png", width: 512, height: 512, alt: "Dental Desk" }],
+  },
+  twitter: {
+    card: "summary",
+    title: "Dental Desk — stomatologlar tarmog'i",
+    description: "Shifokor toping, bo'sh vaqtni tanlang, onlayn yoziling.",
+    images: ["/app-assets/icon-512.png"],
+  },
 };
 
 export default function RootLayout({
