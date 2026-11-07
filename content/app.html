@@ -1978,7 +1978,7 @@ var EXTRAS = [
       cmp_rec_unsupported: "Recording is not available on this device.", cmp_rec_denied: "Microphone access was denied.", cmp_rec_ready: "Voice note recorded.",
       cmp_rec_stop_first: "Stop the recording before saving.", cmp_need: "Write a note or record a voice note.", cmp_saved: "Complaint saved",
       cmp_visibility: "Who can see it", cmp_vis_doctor: "Doctor only", cmp_vis_clinic: "Clinic",
-      cmp_vis_doctor_hint: "Only you (the author) see it.", cmp_vis_clinic_hint: "Doctor, reception, owner and admin see it.",
+      cmp_vis_doctor_hint: "Doctor only — just you (the author).", cmp_vis_clinic_hint: "Clinic — doctor, reception, owner and admin.",
       cmp_show_patient: "Show to the patient", cmp_badge_doctor: "Doctor only", cmp_badge_clinic: "Clinic", cmp_badge_patient: "Patient can see",
       cmp_play: "Play", cmp_audio_missing: "The audio file was not found.", cmp_tooth: "Tooth", cmp_book: "Book appointment", cmp_book_note: "From a complaint",
       cmp_tooth_issue: "Complaint about tooth {n}", cmp_voice_note: "Voice complaint", cmp_voice_only: "Voice note",
@@ -1990,7 +1990,7 @@ var EXTRAS = [
       cmp_rec_unsupported: "Запись недоступна на этом устройстве.", cmp_rec_denied: "Доступ к микрофону запрещён.", cmp_rec_ready: "Голосовая заметка записана.",
       cmp_rec_stop_first: "Остановите запись перед сохранением.", cmp_need: "Напишите текст или запишите голос.", cmp_saved: "Жалоба сохранена",
       cmp_visibility: "Кто видит", cmp_vis_doctor: "Только врачу", cmp_vis_clinic: "Клинике",
-      cmp_vis_doctor_hint: "Видите только вы (автор).", cmp_vis_clinic_hint: "Видят врач, ресепшн, владелец и администратор.",
+      cmp_vis_doctor_hint: "Только врачу — видите только вы (автор).", cmp_vis_clinic_hint: "Клинике — врач, ресепшн, владелец и администратор.",
       cmp_show_patient: "Показывать пациенту", cmp_badge_doctor: "Только врач", cmp_badge_clinic: "Клиника", cmp_badge_patient: "Видно пациенту",
       cmp_play: "Прослушать", cmp_audio_missing: "Аудиофайл не найден.", cmp_tooth: "Зуб", cmp_book: "Записать на приём", cmp_book_note: "Из жалобы",
       cmp_tooth_issue: "Жалоба на зуб {n}", cmp_voice_note: "Голосовая жалоба", cmp_voice_only: "Голосовая заметка",
@@ -2002,7 +2002,7 @@ var EXTRAS = [
       cmp_rec_unsupported: "Bu qurilmada ovoz yozish mavjud emas.", cmp_rec_denied: "Mikrofonga ruxsat berilmadi.", cmp_rec_ready: "Ovozli izoh yozildi.",
       cmp_rec_stop_first: "Saqlashdan oldin yozishni to'xtating.", cmp_need: "Matn yozing yoki ovoz yozib oling.", cmp_saved: "Shikoyat saqlandi",
       cmp_visibility: "Kim ko'radi", cmp_vis_doctor: "Faqat shifokorga", cmp_vis_clinic: "Klinikaga",
-      cmp_vis_doctor_hint: "Faqat siz (muallif) ko'rasiz.", cmp_vis_clinic_hint: "Shifokor, qabulxona, egasi va administrator ko'radi.",
+      cmp_vis_doctor_hint: "Faqat shifokorga — faqat siz (muallif) ko'rasiz.", cmp_vis_clinic_hint: "Klinikaga — shifokor, qabulxona, egasi va administrator ko'radi.",
       cmp_show_patient: "Bemorga ko'rsatish", cmp_badge_doctor: "Faqat shifokor", cmp_badge_clinic: "Klinika", cmp_badge_patient: "Bemorga ochiq",
       cmp_play: "Tinglash", cmp_audio_missing: "Ovoz fayli topilmadi.", cmp_tooth: "Tish", cmp_book: "Qabulga yozish", cmp_book_note: "Shikoyatdan",
       cmp_tooth_issue: "{n}-tish bo'yicha shikoyat", cmp_voice_note: "Ovozli shikoyat", cmp_voice_only: "Ovozli izoh",
@@ -3082,7 +3082,17 @@ function planTotal(plan) {
 }
 function planVariantTotal(v) { var t = 0; (v.stages || []).forEach(function (st) { (st.items || []).forEach(function (it) { t += (+it.qty || 1) * (+it.price || 0); }); }); return t; }
 function plansFor(pid) { return state.plans.filter(function (x) { return x.patientId === pid; }).sort(function (a, b) { return (b.createdAt || 0) - (a.createdAt || 0); }); }
-function toothHist(pid, f) { var d = state.toothHistory.filter(function (x) { return x.patientId === pid && +x.tooth === +f; })[0]; return d ? (d.items || []) : []; }
+function toothHistDocs(pid) {
+  var out = [];
+  state.toothHistory.forEach(function (d) {
+    if (d.patientId !== pid) return;
+    if (d.teeth && typeof d.teeth === "object") {
+      Object.keys(d.teeth).forEach(function (f) { if (isFinite(+f)) out.push({ tooth: +f, items: d.teeth[f] || [], doc: d, legacy: true }); });
+    } else if (isFinite(+d.tooth)) out.push({ tooth: +d.tooth, items: d.items || [], doc: d });
+  });
+  return out;
+}
+function toothHist(pid, f) { var out = []; toothHistDocs(pid).forEach(function (d) { if (+d.tooth === +f) out = out.concat(d.items || []); }); return out; }
 
 /* ---- complaint notes (clinical, per patient / per tooth) ---- */
 function canSeeClinical(role) { return (role == null ? state.role : role) !== "callcenter"; }
@@ -3263,7 +3273,7 @@ function rowInfo(l, v) { return '<div class="list-row"><span class="grow s">' + 
 
 function tabToothHtml(p) {
   var hist = [];
-  if (moduleOn("toothHistory")) state.toothHistory.filter(function (x) { return x.patientId === p.id; }).forEach(function (d) { hist.push({ tooth: d.tooth, items: d.items || [], doc: d }); });
+  if (moduleOn("toothHistory")) toothHistDocs(p.id).forEach(function (d) { hist.push({ tooth: d.tooth, items: d.items, doc: d.doc }); });
   hist.sort(function (a, b) { return a.tooth - b.tooth; });
   var canAct = canWrite() && isStaff() && canSeeClinical();
   var cmpBtn = function (f) { return canAct ? '<button class="btn btn-sm btn-ghost" data-act="cmp-new" data-pid="' + esc(p.id) + '" data-tooth="' + esc(f == null ? "" : f) + '">+ ' + esc(t("cmp_add")) + "</button>" : ""; };
@@ -4342,8 +4352,10 @@ function openShiftModal(docId, date) {
 
 /* ---- tooth history ---- */
 function openToothHistoryModal(patientId, tooth) {
-  var tth = +tooth, doc = state.toothHistory.filter(function (d) { return d.patientId === patientId && +d.tooth === tth; })[0];
-  var items = doc ? (doc.items || []).slice() : [];
+  var tth = +tooth, entries = toothHistDocs(patientId).filter(function (d) { return d.tooth === tth; });
+  var doc = entries.filter(function (d) { return !d.legacy; }).map(function (d) { return d.doc; })[0];
+  var legacy = entries.filter(function (d) { return d.legacy; }).map(function (d) { return d.doc.id; });
+  var items = toothHist(patientId, tth).slice();
   items.push({ date: todayStr(), proc: "", note: "", canal: "" });
   function body() {
     return '<div class="stack"><p class="muted">' + esc(t("th_intro", { n: numOf(tth), name: toothName(tth) })) + "</p>" +
@@ -4360,7 +4372,7 @@ function openToothHistoryModal(patientId, tooth) {
     if (!outs.length) { mErr(t("required")); return; }
     outs.sort(function (a, b) { return (a.date || "").localeCompare(b.date || ""); });
     return save("toothHistory", (doc && doc.id) || uid("th_"), { patientId: patientId, tooth: tth, items: outs, updatedAt: Date.now() }).then(function (ok) {
-      if (ok) { closeModal(); toast(t("saved_ok")); }
+      if (ok) { legacy.forEach(function (id) { removeDoc("toothHistory", id); }); closeModal(); toast(t("saved_ok")); }
     });
   }, null);
 }
