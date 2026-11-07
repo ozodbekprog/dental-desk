@@ -173,7 +173,13 @@ export default async function Home() {
             <Logo />
             <span className="dd-display text-lg font-extrabold text-ink">Dental Desk</span>
           </Link>
-          <nav className="hidden items-center gap-7 text-sm text-muted md:flex">
+          <nav className="hidden items-center gap-5 text-sm text-muted lg:flex xl:gap-7">
+            <Link href="/shifokorlar" className="hover:text-accent">
+              Shifokorlar
+            </Link>
+            <Link href="/klinikalar" className="hover:text-accent">
+              Klinikalar
+            </Link>
             <a href="#imkoniyatlar" className="hover:text-accent">
               Imkoniyatlar
             </a>
