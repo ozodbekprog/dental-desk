@@ -13,7 +13,7 @@ import { ClinicCardView } from "@/components/network/ClinicCard";
 import { Avatar } from "@/components/network/Avatar";
 import { Stars } from "@/components/network/Stars";
 import { StarIcon } from "@/components/network/icons";
-import { SmileScene3D } from "@/components/network/SmileScene3D";
+import { ToothAnatomy } from "@/components/network/ToothAnatomy";
 import { formatReviewDate } from "@/components/network/format";
 
 export const dynamic = "force-dynamic";
@@ -205,7 +205,7 @@ export default async function HomePage() {
                 className="absolute -inset-8 rounded-[54px] bg-[radial-gradient(ellipse_at_center,rgba(12,106,114,0.16),transparent_68%)] blur-2xl"
                 aria-hidden="true"
               />
-              <SmileScene3D className="relative" />
+              <ToothAnatomy className="relative" />
 
               <div className="relative z-10 mt-4 flex items-center gap-3 rounded-2xl border border-line-strong bg-surface px-4 py-3.5 shadow-[0_24px_60px_-38px_rgba(9,56,60,0.55)] sm:px-5">
                 {heroDoctor ? (
