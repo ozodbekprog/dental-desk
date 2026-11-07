@@ -679,6 +679,35 @@ try {
   await prisma.clinic.delete({ where: { id: target.id } });
   ok("Test klinikasi tozalandi");
 
+  // public-request artifacts land in the shared demo clinic too
+  const demoClinic = await prisma.clinic.findFirst({ where: { slug: "demo" } });
+  if (demoClinic) {
+    const recs = await prisma.record.findMany({
+      where: { clinicId: demoClinic.id, collection: { in: ["appointments", "patients", "requests", "reqstate", "slots"] } },
+    });
+    const appts = recs.filter((r) => r.collection === "appointments" && r.data.includes(String(stamp))).map((r) => r.docId);
+    const pats = recs.filter((r) => r.collection === "patients" && (r.data.includes(String(stamp)) || r.docId === "e2e-patient")).map((r) => r.docId);
+    const reqIds = recs.filter((r) => r.collection === "requests" && r.data.includes(String(stamp).slice(-7))).map((r) => r.docId);
+    const requestItems = recs
+      .filter((r) => r.collection === "requests" && r.data.includes(String(stamp).slice(-7)))
+      .flatMap((r) => { try { return (JSON.parse(r.data).items || []).map((it) => it.id); } catch { return []; } })
+      .filter(Boolean);
+    const states = recs.filter((r) => {
+      if (r.collection !== "reqstate") return false;
+      if (requestItems.includes(r.docId)) return true;
+      try { return reqIds.includes(JSON.parse(r.data).requestId); } catch { return false; }
+    }).map((r) => r.docId);
+    const slots = recs.filter((r) => {
+      if (r.collection !== "slots") return false;
+      try { return appts.includes(JSON.parse(r.data).ref); } catch { return false; }
+    }).map((r) => r.docId);
+    const groups = { appointments: appts, patients: pats, requests: reqIds, reqstate: states, slots };
+    for (const [collection, docIds] of Object.entries(groups)) {
+      if (docIds.length) await prisma.record.deleteMany({ where: { clinicId: demoClinic.id, collection, docId: { in: docIds } } });
+    }
+    ok("Demo klinikadagi test izlari tozalandi");
+  }
+
   console.log("\n" + results.length + " checks passed.");
 } finally {
   await browser.close();
