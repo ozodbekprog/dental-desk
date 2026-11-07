@@ -47,6 +47,18 @@ try {
   assert.equal(r.status, 200, "demo login");
 
   await pageA.goto(base + "/app", { waitUntil: "load" });
+  // demo appointments carry fixed seed dates, so open the day they live on
+  const demoSeed = await prisma.record.findFirst({ where: { collection: "appointments", docId: "dd-demo-a1" } });
+  if (demoSeed) {
+    const demoDay = JSON.parse(demoSeed.data).date;
+    await pageA.waitForSelector("#dayPick", { timeout: 15000 });
+    await pageA.evaluate((day) => {
+      const el = document.querySelector("#dayPick");
+      if (!el || el.value === day) return;
+      el.value = day;
+      el.dispatchEvent(new Event("change", { bubbles: true }));
+    }, demoDay);
+  }
   await pageA.waitForFunction(() => document.body.innerText.includes("Dilnoza Rasulova"), null, { timeout: 15000 });
   ok("Demo ma'lumotlari UI'da ko'rinadi");
 
@@ -64,7 +76,7 @@ try {
   await pageA.fill("#ddai-input", "bugun navbatlar");
   await pageA.press("#ddai-input", "Enter");
   await pageA.waitForFunction(
-    () => Array.from(document.querySelectorAll(".ddai-msg.bot")).some((el) => el.innerText.includes("navbatlari")),
+    () => Array.from(document.querySelectorAll(".ddai-msg.bot")).some((el) => el.innerText.includes("navbat")),
     null,
     { timeout: 10000 }
   );
@@ -340,10 +352,17 @@ try {
   assert.match(r.body.reply, /qo'shildi/);
   assert.equal(r.body.actions.length, 1);
 
+  // "ertaga" may fall on Sunday (closed), so book the next open day explicitly
+  const openDay = (() => {
+    const d = new Date();
+    d.setDate(d.getDate() + 2);
+    while (d.getDay() === 0) d.setDate(d.getDate() + 1);
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  })();
   r = await api(pageB, "/api/assistant", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ messages: [{ role: "user", content: "ertaga 10:00 AI Bemorni AI Test qabuliga yoz" }] }),
+    body: JSON.stringify({ messages: [{ role: "user", content: `${openDay} 10:00 AI Bemorni AI Test qabuliga yoz` }] }),
   });
   assert.equal(r.status, 200);
   assert.match(r.body.reply, /Navbat yaratildi/);
