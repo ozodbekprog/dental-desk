@@ -11,6 +11,7 @@
     "db:deploy": "prisma migrate deploy",
     "seed:admin": "node --import tsx --import ./scripts/with-env.mjs scripts/create-super-admin.ts",
     "seed:demo": "node --import tsx --import ./scripts/with-env.mjs scripts/seed-demo.ts",
+    "seed:network": "node --import tsx --import ./scripts/with-env.mjs scripts/sync-network.ts",
     "db:backup": "./scripts/backup-db.sh",
     "check:e2e": "node --import ./scripts/with-env.mjs scripts/e2e-check.mjs",
     "screenshots": "node --import ./scripts/with-env.mjs scripts/screenshots.mjs"

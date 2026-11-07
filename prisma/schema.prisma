@@ -15,10 +15,15 @@ model Clinic {
   status      String    @default("active") // active | expired | suspended
   trialEndsAt DateTime?
   paidUntil   DateTime?
+  address     String    @default("")
+  phone       String    @default("")
+  mapUrl      String    @default("")
   createdAt   DateTime  @default(now())
   users       User[]
   records     Record[]
   invoices    Invoice[]
+  doctors     ClinicDoctor[]
+  networkBookings NetworkBooking[]
 }
 
 model Invoice {
@@ -68,4 +73,125 @@ model Record {
   @@unique([clinicId, collection, docId])
   @@index([clinicId, collection])
   @@index([clinicId, updatedAt])
+}
+
+/// Global doctor identity, independent of a single clinic. Clinic staff doctors
+/// are backfilled from the per-clinic `doctors` records by scripts/sync-network.ts.
+model DoctorProfile {
+  id          String   @id @default(cuid())
+  userId      String?  @unique // login for independent (contract) doctors
+  name        String
+  phone       String   @default("")
+  email       String   @default("")
+  specialty   String   @default("therapist") // therapist | surgeon | orthodontist | hygienist | pediatric
+  licenseNo   String   @default("")
+  experience  Int      @default(0)
+  bio         String   @default("")
+  photoUrl    String   @default("")
+  contract    String   @default("clinic") // clinic | platform
+  status      String   @default("active") // active | pending | suspended
+  isPublic    Boolean  @default(true)
+  address     String   @default("") // reception place for independent doctors
+  mapUrl      String   @default("")
+  priceFrom   Int      @default(0) // UZS, 0 = negotiable / not set
+  ratingAvg   Float    @default(0)
+  ratingCount Int      @default(0)
+  createdAt   DateTime @default(now())
+  clinics     ClinicDoctor[]
+  bookings    NetworkBooking[]
+  reviews     DoctorReview[]
+
+  @@index([status, isPublic])
+  @@index([name])
+}
+
+model ClinicDoctor {
+  id        String        @id @default(cuid())
+  clinicId  String
+  clinic    Clinic        @relation(fields: [clinicId], references: [id], onDelete: Cascade)
+  doctorId  String
+  doctor    DoctorProfile @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+  recordId  String // docId inside the clinic `doctors` collection
+  isPublic  Boolean       @default(true)
+  createdAt DateTime      @default(now())
+
+  @@unique([clinicId, doctorId])
+  @@unique([clinicId, recordId])
+  @@index([doctorId])
+}
+
+/// Patient identity by phone; optional account for the patient cabinet.
+model PatientAccount {
+  id           String    @id @default(cuid())
+  phone        String    @unique // digits only
+  name         String    @default("")
+  otpHash      String    @default("")
+  otpExpiresAt DateTime?
+  otpAttempts  Int       @default(0)
+  lastLoginAt  DateTime?
+  createdAt    DateTime  @default(now())
+  links        PatientClinicLink[]
+  bookings     NetworkBooking[]
+
+  @@index([phone])
+}
+
+/// Maps a global patient to a per-clinic `patients` record (auto-linked by phone).
+model PatientClinicLink {
+  id        String         @id @default(cuid())
+  patientId String
+  patient   PatientAccount @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  clinicId  String
+  recordId  String
+  createdAt DateTime       @default(now())
+
+  @@unique([clinicId, recordId])
+  @@index([patientId])
+}
+
+/// Public booking for an independent doctor. Clinic doctors use the existing
+/// per-clinic `requests` queue so reception and the doctor see it in the app.
+model NetworkBooking {
+  id          String         @id @default(cuid())
+  code        String         @unique // short public status code
+  doctorId    String
+  doctor      DoctorProfile  @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+  clinicId    String?
+  clinic      Clinic?        @relation(fields: [clinicId], references: [id], onDelete: SetNull)
+  patientId   String?
+  patient     PatientAccount? @relation(fields: [patientId], references: [id], onDelete: SetNull)
+  name        String
+  phone       String
+  date        String
+  time        String
+  duration    Int            @default(30)
+  reason      String         @default("")
+  reasonKind  String         @default("") // text | audio
+  audioData   String         @default("") // small voice note data URL
+  status      String         @default("requested") // requested | confirmed | declined | cancelled | completed
+  address     String         @default("")
+  mapUrl      String         @default("")
+  doctorNote  String         @default("")
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  confirmedAt DateTime?
+
+  @@index([doctorId, date, status])
+  @@index([phone])
+  @@index([clinicId, status])
+}
+
+model DoctorReview {
+  id        String        @id @default(cuid())
+  doctorId  String
+  doctor    DoctorProfile @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+  clinicId  String?
+  patientId String?
+  bookingId String?       @unique
+  rating    Int
+  comment   String        @default("")
+  status    String        @default("published") // published | hidden
+  createdAt DateTime      @default(now())
+
+  @@index([doctorId, status])
 }
