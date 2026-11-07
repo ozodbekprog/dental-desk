@@ -91,12 +91,15 @@ export type PatientBooking = {
   kind: "doctor" | "clinic";
   code: string;
   status: string;
+  doctorId?: string;
   doctorName: string;
   date: string;
   time: string;
   clinicName: string;
   address?: string;
   mapUrl?: string;
+  reviewed?: boolean;
+  reviewRating?: number;
 };
 
 export type PatientHistory = {

@@ -55,7 +55,7 @@ export async function GET() {
   const account = await prisma.patientAccount.findUnique({ where: { id: session.uid } });
   if (!account) return Response.json({ error: "unauthorized" }, { status: 401 });
 
-  const [links, clinics, bookingRows, networkRows] = await Promise.all([
+  const [links, clinics, bookingRows, networkRows, reviewRows] = await Promise.all([
     prisma.patientClinicLink.findMany({
       where: { patientId: account.id },
       orderBy: { createdAt: "asc" },
@@ -72,6 +72,7 @@ export async function GET() {
         id: true,
         code: true,
         phone: true,
+        doctorId: true,
         date: true,
         time: true,
         status: true,
@@ -81,7 +82,15 @@ export async function GET() {
         clinic: { select: { id: true, name: true } },
       },
     }),
+    prisma.doctorReview.findMany({
+      where: { patientId: account.id, bookingId: { not: null } },
+      select: { bookingId: true, rating: true },
+    }),
   ]);
+
+  const reviewMap = new Map(
+    reviewRows.map((row) => [String(row.bookingId), row.rating] as const)
+  );
 
   const clinicMap = new Map(clinics.map((clinic) => [clinic.id, clinic]));
 
@@ -313,15 +322,19 @@ export async function GET() {
     .filter((row) => normalizePhone(row.phone) === account.phone)
     .map((row) => {
       const confirmed = row.status === "confirmed";
+      const reviewRating = reviewMap.get(row.id) || 0;
       return {
         id: row.id,
         kind: "doctor" as const,
         code: row.code,
         status: row.status,
+        doctorId: row.doctorId,
         doctorName: row.doctor?.name || "",
         date: row.date,
         time: row.time,
         clinicName: row.clinic?.name || "",
+        reviewed: reviewRating > 0,
+        reviewRating,
         ...(confirmed
           ? {
               address: row.address || row.doctor?.address || "",

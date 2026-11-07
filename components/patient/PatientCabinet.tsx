@@ -3,6 +3,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Logo } from "@/components/Logo";
+import { Stars } from "@/components/network/Stars";
+import { StarIcon } from "@/components/network/icons";
 import { ToothChart3D, type ToothComplaint } from "./ToothChart3D";
 import {
   ALERT_LABELS,
@@ -38,6 +40,27 @@ const TONES: Record<string, string> = {
   danger: "border-danger/25 bg-danger/10 text-danger",
   muted: "border-line bg-surface-2 text-muted",
 };
+
+function visitPassed(date: string, time: string): boolean {
+  const at = new Date(`${date}T${time || "00:00"}:00+05:00`).getTime();
+  return Number.isFinite(at) && at <= Date.now();
+}
+
+function reviewErrorText(code: string, status: number): string {
+  if (status === 401) return "Sessiya tugagan. Qaytadan kiring.";
+  switch (code) {
+    case "already_reviewed":
+      return "Bu qabul allaqachon baholangan.";
+    case "not_visited":
+      return "Sharhni qabul vaqti o'tgandan keyin qoldirish mumkin.";
+    case "bad_rating":
+      return "1 dan 5 gacha yulduz tanlang.";
+    case "forbidden":
+      return "Bu bron sizga tegishli emas.";
+    default:
+      return "Sharh yuborilmadi. Qayta urinib ko'ring.";
+  }
+}
 
 function Badge({ status }: { status: string }) {
   const meta = statusMeta(status);
@@ -92,6 +115,11 @@ export function PatientCabinet({ initialName }: { initialName: string }) {
   const [loading, setLoading] = useState(true);
   const [tick, setTick] = useState(0);
   const [loggingOut, setLoggingOut] = useState(false);
+  const [reviewFor, setReviewFor] = useState("");
+  const [reviewRating, setReviewRating] = useState(5);
+  const [reviewComment, setReviewComment] = useState("");
+  const [reviewError, setReviewError] = useState("");
+  const [reviewSending, setReviewSending] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -259,6 +287,36 @@ export function PatientCabinet({ initialName }: { initialName: string }) {
       router.refresh();
     } finally {
       setLoggingOut(false);
+    }
+  }
+
+  async function submitReview() {
+    if (!reviewFor || reviewSending) return;
+    setReviewSending(true);
+    setReviewError("");
+    try {
+      const res = await fetch("/api/patient/reviews", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          bookingId: reviewFor,
+          rating: reviewRating,
+          comment: reviewComment,
+        }),
+      });
+      const json = (await res.json().catch(() => null)) as { error?: string } | null;
+      if (!res.ok) {
+        setReviewError(reviewErrorText(json?.error || "", res.status));
+        return;
+      }
+      setReviewFor("");
+      setReviewComment("");
+      setReviewRating(5);
+      setTick((value) => value + 1);
+    } catch {
+      setReviewError("Sharh yuborilmadi. Internetni tekshirib, qayta urinib ko'ring.");
+    } finally {
+      setReviewSending(false);
     }
   }
 
@@ -663,6 +721,11 @@ export function PatientCabinet({ initialName }: { initialName: string }) {
             {bookingsView.length ? (
               bookingsView.map((booking: PatientBooking) => {
                 const confirmed = booking.status === "confirmed";
+                const canReview =
+                  booking.kind === "doctor" &&
+                  Boolean(booking.doctorId) &&
+                  confirmed &&
+                  visitPassed(booking.date, booking.time);
                 return (
                   <article
                     key={`${booking.kind}-${booking.id}`}
@@ -705,7 +768,92 @@ export function PatientCabinet({ initialName }: { initialName: string }) {
                           Kod: <span className="dd-mono font-semibold text-ink">{booking.code}</span>
                         </p>
                       ) : null}
+
+                      {booking.kind === "doctor" && booking.reviewed ? (
+                        <p className="mt-2 inline-flex items-center gap-1.5 text-xs text-muted">
+                          <Stars value={booking.reviewRating || 0} />
+                          Siz baholagansiz
+                        </p>
+                      ) : canReview ? (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setReviewFor(booking.id);
+                            setReviewRating(5);
+                            setReviewComment("");
+                            setReviewError("");
+                          }}
+                          className="dd-btn dd-btn-ghost mt-2 !px-2.5 !py-1.5 text-xs"
+                        >
+                          Qabulni baholash
+                        </button>
+                      ) : null}
                     </div>
+
+                    {reviewFor === booking.id ? (
+                      <div className="mt-1 w-full rounded-xl border border-line bg-surface-2/70 p-3.5">
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                          <p className="text-sm font-semibold text-ink">Qabul qanday o&apos;tdi?</p>
+                          <button
+                            type="button"
+                            onClick={() => setReviewFor("")}
+                            className="text-xs font-semibold text-muted transition hover:text-danger"
+                          >
+                            Bekor qilish
+                          </button>
+                        </div>
+                        <div className="mt-2 flex items-center gap-1" role="group" aria-label="Reyting">
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <button
+                              key={star}
+                              type="button"
+                              onClick={() => setReviewRating(star)}
+                              aria-label={`${star} yulduz`}
+                              aria-pressed={reviewRating === star}
+                              className="rounded p-0.5 transition hover:scale-110"
+                            >
+                              <svg
+                                viewBox="0 0 24 24"
+                                fill={star <= reviewRating ? "currentColor" : "none"}
+                                stroke="currentColor"
+                                strokeWidth="1.5"
+                                strokeLinejoin="round"
+                                className={`h-6 w-6 ${
+                                  star <= reviewRating ? "text-gold" : "text-line-strong"
+                                }`}
+                                aria-hidden="true"
+                              >
+                                <path d="m12 3.4 2.7 5.52 6.05.9-4.4 4.27 1.04 6.03L12 17.28l-5.39 2.84 1.04-6.03-4.4-4.27 6.05-.9Z" />
+                              </svg>
+                            </button>
+                          ))}
+                        </div>
+                        <textarea
+                          value={reviewComment}
+                          onChange={(event) => setReviewComment(event.target.value)}
+                          rows={3}
+                          maxLength={500}
+                          placeholder="Izoh (ixtiyoriy): nima yoqdi, nimani yaxshilash kerak?"
+                          className="dd-input mt-2 resize-none text-sm"
+                        />
+                        {reviewError ? (
+                          <p className="mt-1.5 text-xs font-medium text-danger">{reviewError}</p>
+                        ) : null}
+                        <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
+                          <span className="text-[11px] text-muted">
+                            Sharh shifokor profilida ko&apos;rinadi.
+                          </span>
+                          <button
+                            type="button"
+                            onClick={submitReview}
+                            disabled={reviewSending}
+                            className="dd-btn dd-btn-primary !px-3 !py-2 text-sm disabled:opacity-60"
+                          >
+                            {reviewSending ? "Yuborilmoqda..." : "Sharh qoldirish"}
+                          </button>
+                        </div>
+                      </div>
+                    ) : null}
                   </article>
                 );
               })
