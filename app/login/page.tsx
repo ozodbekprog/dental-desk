@@ -10,7 +10,11 @@ export default async function LoginPage({
   searchParams: Promise<{ next?: string }>;
 }) {
   const session = await getSession();
-  if (session) redirect(session.role === "super" ? "/admin" : "/app");
+  if (session) {
+    if (session.role === "super") redirect("/admin");
+    if (session.role === "doctor" && !session.cid) redirect("/doktor");
+    redirect("/app");
+  }
 
   const params = await searchParams;
   const next =
@@ -21,7 +25,7 @@ export default async function LoginPage({
   return (
     <AuthShell
       title="Xush kelibsiz"
-      subtitle="Klinika hisobingizga kiring."
+      subtitle="Klinika yoki shifokor hisobingizga kiring."
       footer={
         <p>
           Hisobingiz yo'qmi?{" "}

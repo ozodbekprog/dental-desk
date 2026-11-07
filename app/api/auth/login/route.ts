@@ -42,6 +42,11 @@ export async function POST(req: Request) {
   return Response.json({
     ok: true,
     role: user.role,
-    redirect: user.role === "super" ? "/admin" : "/app",
+    redirect:
+      user.role === "super"
+        ? "/admin"
+        : user.role === "doctor" && !user.clinicId
+          ? "/doktor"
+          : "/app",
   });
 }

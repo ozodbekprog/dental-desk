@@ -17,6 +17,13 @@ export async function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
+  if (pathname === "/doktor" || pathname.startsWith("/doktor/")) {
+    // Independent (clinic-less) doctors get the portal; everyone else stays in /app.
+    if (session.role === "doctor" && !session.cid) return NextResponse.next();
+    if (session.role === "super") return NextResponse.next();
+    return NextResponse.redirect(new URL("/app", req.url));
+  }
+
   if (!session.cid) {
     return NextResponse.redirect(new URL(session.role === "super" ? "/admin" : "/login", req.url));
   }
@@ -25,5 +32,5 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/app", "/settings", "/settings/:path*", "/admin", "/admin/:path*"],
+  matcher: ["/app", "/settings", "/settings/:path*", "/admin", "/admin/:path*", "/doktor", "/doktor/:path*"],
 };
