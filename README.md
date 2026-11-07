@@ -87,6 +87,31 @@ Egasi va muallifi: **Ozodbek Xoshimov Xusanovich, Xoshimov Group** (2026).
   tarixi tool'lari.
 - **PWA** — `manifest.webmanifest`, service worker, oflayn qobiq, mobil pastki tab.
 
+### v3 — shifokorlar tarmog'i va bemor kabineti
+
+- **Global katalog** — `/shifokorlar`, `/klinikalar`: barcha tish shifokorlari,
+  mutaxassislik, tajriba, narx ("kelishiladi" bo'lishi mumkin), reyting va sharhlar.
+  Klinika shifokori klinikaga, mustaqil shifokor o'z qabul joyiga bog'langan.
+- **Mehmon bron** — `/bron/<doctorId>`: akkaunt shart emas. Shifokor, kun, vaqt,
+  ism va telefon, sabab matn yoki ovozli xabar bilan yuboriladi. So'rov 2 soat
+  ushlab turiladi va **faqat shifokor/qabulxona tasdiqlagach** qabul kuchga kiradi;
+  tasdiqlangandan keyingina bemorga vaqt va manzil ko'rinadi (`/bron/holat`).
+- **Tashqi shifokor kabineti** — `/doktor`: mustaqil shifokor so'rovlarni ko'radi,
+  vaqtni tekshirib tasdiqlaydi/rad etadi, profil va qabul manzilini tahrirlaydi.
+- **Bemor kabineti** — `/kabinet`: telefon + bir martalik kod (OTP), parol shart
+  emas. Tashriflar, tish tarixi va bronlar; tish xaritasi 3D (Three.js) ko'rinishda.
+- **Shikoyat qaydlari** — shifokor matn yoki ovozli izoh qoldiradi, faqat o'zi
+  yoki klinika (shifokor + qabulxona) ko'radigan qilib belgilaydi; bemorga
+  ko'rsatish alohida. Maxfiylik serverda tekshiriladi (call markaz ko'rmaydi).
+- **Qabul davomiyligi** — shifokor qabulni +15/−15 daqiqa uzaytiradi yoki
+  qisqartiradi; keyingi band vaqt bilan to'qnashuv bloklanadi.
+- **Reyting** — shifokor kartasi va profilida o'rtacha baho va sharhlar ko'rsatiladi
+  (`DoctorReview`; demo sharhlar `seed:network` bilan qo'shiladi).
+
+Tarmoq ma'lumotlarini tayyorlash: `npm run seed:network` (demo klinika shifokorlari
+bilan bog'lanadi va mustaqil `doktor@demo.uz` profilini yaratadi; parol
+`DEMO_DOCTOR_PASSWORD`, sukut bo'yicha `doktor1234`).
+
 ## 32Desk bilan taqqoslash
 
 | Funksiya | 32Desk | Dental Desk v2 |
