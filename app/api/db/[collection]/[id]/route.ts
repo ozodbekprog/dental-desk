@@ -3,7 +3,7 @@ import { canWriteRole, clinicWritable } from "@/lib/auth";
 import type { SessionUser } from "@/lib/jwt";
 import { collectionAllowed, patientCap } from "@/lib/plans";
 import { prisma } from "@/lib/prisma";
-import { CALL_CENTER_HIDDEN, isCollection, jsonError } from "@/lib/util";
+import { CALL_CENTER_HIDDEN, complaintVisibleTo, isCollection, jsonError } from "@/lib/util";
 import type { Clinic } from "@prisma/client";
 
 export const runtime = "nodejs";
@@ -53,7 +53,11 @@ export async function GET(_req: Request, { params }: Params) {
     },
   });
   if (!row) return Response.json({ exists: false, data: null });
-  return Response.json({ exists: true, data: JSON.parse(row.data) });
+  const data = JSON.parse(row.data);
+  if (collection === "complaints" && !complaintVisibleTo(data, ctx.session.uid)) {
+    return jsonError("not_found", 404);
+  }
+  return Response.json({ exists: true, data });
 }
 
 export async function PUT(req: Request, { params }: Params) {
@@ -68,6 +72,19 @@ export async function PUT(req: Request, { params }: Params) {
   if (!payload) return jsonError("invalid_data");
 
   const docId = decodeURIComponent(id).slice(0, 200);
+  if (collection === "complaints") {
+    const note = payload.data;
+    if (typeof note.text === "string") note.text = note.text.slice(0, 2000);
+    if (typeof note.audioData === "string" && note.audioData.length > 1_600_000) {
+      return jsonError("invalid_data");
+    }
+    note.visibility = note.visibility === "clinic" ? "clinic" : "doctor";
+    note.visibleToPatient = note.visibleToPatient === true;
+    note.authorId = ctx.session.uid;
+    note.authorName = ctx.session.name;
+    note.authorRole = ctx.session.role;
+    if (typeof note.at !== "number") note.at = Date.now();
+  }
   if (collection === "patients") {
     const exists = await prisma.record.findUnique({
       where: { clinicId_collection_docId: { clinicId: ctx.clinic.id, collection, docId } },
@@ -125,6 +142,19 @@ export async function PATCH(req: Request, { params }: Params) {
   if (!row) return jsonError("not_found", 404);
 
   const current = JSON.parse(row.data) as Record<string, unknown>;
+  if (collection === "complaints") {
+    if (current.authorId !== ctx.session.uid) return jsonError("forbidden", 403);
+    if (payload.data.visibility !== undefined) {
+      payload.data.visibility = payload.data.visibility === "clinic" ? "clinic" : "doctor";
+    }
+    if (payload.data.visibleToPatient !== undefined) {
+      payload.data.visibleToPatient = payload.data.visibleToPatient === true;
+    }
+    delete payload.data.authorId;
+    delete payload.data.authorName;
+    delete payload.data.authorRole;
+    delete payload.data.at;
+  }
   const merged = { ...current, ...payload.data };
   await prisma.record.update({
     where: { id: row.id },
@@ -141,6 +171,18 @@ export async function DELETE(_req: Request, { params }: Params) {
   if (denied) return denied;
 
   const docId = decodeURIComponent(id).slice(0, 200);
+  if (collection === "complaints") {
+    const row = await prisma.record.findUnique({
+      where: {
+        clinicId_collection_docId: { clinicId: ctx.clinic.id, collection, docId },
+      },
+      select: { data: true },
+    });
+    if (row) {
+      const note = JSON.parse(row.data) as Record<string, unknown>;
+      if (note.authorId !== ctx.session.uid) return jsonError("forbidden", 403);
+    }
+  }
   await prisma.record.deleteMany({
     where: { clinicId: ctx.clinic.id, collection, docId },
   });

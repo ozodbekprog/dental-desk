@@ -10,6 +10,8 @@
     "chairs", "branches", "waitlist", "toothHistory", "diagnoses", "plans", "labOrders", "labs",
     "templates", "documents", "campaigns", "messages", "msgTemplates", "outbox", "inventory",
     "materialUse", "suppliers", "purchases", "payments", "payroll", "shifts", "audit", "files", "fileData",
+    /* v3: clinical complaint notes */
+    "complaints",
   ];
 
   var store = {};

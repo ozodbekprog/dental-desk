@@ -1,6 +1,6 @@
 import { clinicContext } from "@/lib/api";
 import { prisma } from "@/lib/prisma";
-import { CALL_CENTER_HIDDEN } from "@/lib/util";
+import { CALL_CENTER_HIDDEN, complaintVisibleTo } from "@/lib/util";
 
 export const runtime = "nodejs";
 
@@ -38,6 +38,14 @@ export async function GET() {
           patients[id] = copy;
         }
       }
+    }
+  }
+
+  // Doctor-only notes never leave the author's session, for any staff role.
+  const complaints = collections.complaints;
+  if (complaints) {
+    for (const id of Object.keys(complaints)) {
+      if (!complaintVisibleTo(complaints[id], ctx.session.uid)) delete complaints[id];
     }
   }
 

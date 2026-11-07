@@ -38,6 +38,8 @@ export const COLLECTIONS = [
   "audit",
   "files",
   "fileData",
+  // v3 network
+  "complaints",
 ] as const;
 
 export type CollectionName = (typeof COLLECTIONS)[number];
@@ -55,6 +57,7 @@ export const CLINICAL_COLLECTIONS: readonly string[] = [
   "materialUse",
   "audit",
   "fileData",
+  "complaints",
 ];
 
 /** Collections that are never writable by the call-centre role either. */
@@ -68,6 +71,14 @@ export const CALL_CENTER_HIDDEN: readonly string[] = [
 
 export function isCollection(name: string): name is CollectionName {
   return (COLLECTIONS as readonly string[]).includes(name);
+}
+
+/** Doctor-only complaint notes are visible to their author alone. */
+export function complaintVisibleTo(doc: unknown, uid: string): boolean {
+  if (!doc || typeof doc !== "object") return true;
+  const note = doc as Record<string, unknown>;
+  if (note.visibility !== "doctor") return true;
+  return note.authorId === uid;
 }
 
 export function jsonError(message: string, status = 400) {

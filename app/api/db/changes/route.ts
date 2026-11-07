@@ -1,6 +1,6 @@
 import { clinicContext } from "@/lib/api";
 import { prisma } from "@/lib/prisma";
-import { CALL_CENTER_HIDDEN } from "@/lib/util";
+import { CALL_CENTER_HIDDEN, complaintVisibleTo } from "@/lib/util";
 
 export const runtime = "nodejs";
 
@@ -39,6 +39,12 @@ export async function GET(req: Request) {
       parsed = JSON.parse(row.data);
     } catch {
       parsed = {};
+    }
+    if (row.collection === "complaints" && !complaintVisibleTo(parsed, ctx.session.uid)) {
+      // A note that is no longer visible must disappear from the client cache.
+      revs[`complaints/${row.docId}`] = 0;
+      cursor = Math.max(cursor, row.updatedAt.getTime());
+      continue;
     }
     (collections[row.collection] ||= {})[row.docId] = parsed;
     revs[`${row.collection}/${row.docId}`] = row.rev;

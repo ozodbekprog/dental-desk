@@ -1969,6 +1969,48 @@ var EXTRAS = [
   };
   Object.keys(X).forEach(function (l) { Object.assign(STR[l], X[l]); });
 })();
+/* v3: complaint notes, voice reasons, duration quick actions */
+(function () {
+  var X = {
+    en: { cmp_title: "Complaint note", cmp_section: "Complaints", cmp_add: "Add complaint", cmp_none: "No complaints yet",
+      cmp_text: "Complaint text", cmp_text_ph: "What the patient reports, what bothers them…", cmp_optional: "Text or voice — at least one of them.",
+      cmp_voice: "Voice note", cmp_rec_start: "Start recording", cmp_rec_stop: "Stop", cmp_rec_hint: "Up to 60 seconds. The audio is stored with the patient's files.",
+      cmp_rec_unsupported: "Recording is not available on this device.", cmp_rec_denied: "Microphone access was denied.", cmp_rec_ready: "Voice note recorded.",
+      cmp_rec_stop_first: "Stop the recording before saving.", cmp_need: "Write a note or record a voice note.", cmp_saved: "Complaint saved",
+      cmp_visibility: "Who can see it", cmp_vis_doctor: "Doctor only", cmp_vis_clinic: "Clinic",
+      cmp_vis_doctor_hint: "Only you (the author) see it.", cmp_vis_clinic_hint: "Doctor, reception, owner and admin see it.",
+      cmp_show_patient: "Show to the patient", cmp_badge_doctor: "Doctor only", cmp_badge_clinic: "Clinic", cmp_badge_patient: "Patient can see",
+      cmp_play: "Play", cmp_audio_missing: "The audio file was not found.", cmp_tooth: "Tooth", cmp_book: "Book appointment", cmp_book_note: "From a complaint",
+      cmp_tooth_issue: "Complaint about tooth {n}", cmp_voice_note: "Voice complaint", cmp_voice_only: "Voice note",
+      req_source_network: "Network", dur_plus: "+15 min", dur_minus: "−15 min", dur_conflict: "Cannot extend: the next slot is already booked.",
+      dur_min: "Minimum duration is 15 minutes.", dur_saved: "Duration set to {n} min" },
+    ru: { cmp_title: "Жалоба", cmp_section: "Жалобы", cmp_add: "Добавить жалобу", cmp_none: "Жалоб пока нет",
+      cmp_text: "Текст жалобы", cmp_text_ph: "Что беспокоит пациента…", cmp_optional: "Текст или голос — хотя бы одно.",
+      cmp_voice: "Голосовая заметка", cmp_rec_start: "Начать запись", cmp_rec_stop: "Остановить", cmp_rec_hint: "До 60 секунд. Аудио сохраняется в файлах пациента.",
+      cmp_rec_unsupported: "Запись недоступна на этом устройстве.", cmp_rec_denied: "Доступ к микрофону запрещён.", cmp_rec_ready: "Голосовая заметка записана.",
+      cmp_rec_stop_first: "Остановите запись перед сохранением.", cmp_need: "Напишите текст или запишите голос.", cmp_saved: "Жалоба сохранена",
+      cmp_visibility: "Кто видит", cmp_vis_doctor: "Только врачу", cmp_vis_clinic: "Клинике",
+      cmp_vis_doctor_hint: "Видите только вы (автор).", cmp_vis_clinic_hint: "Видят врач, ресепшн, владелец и администратор.",
+      cmp_show_patient: "Показывать пациенту", cmp_badge_doctor: "Только врач", cmp_badge_clinic: "Клиника", cmp_badge_patient: "Видно пациенту",
+      cmp_play: "Прослушать", cmp_audio_missing: "Аудиофайл не найден.", cmp_tooth: "Зуб", cmp_book: "Записать на приём", cmp_book_note: "Из жалобы",
+      cmp_tooth_issue: "Жалоба на зуб {n}", cmp_voice_note: "Голосовая жалоба", cmp_voice_only: "Голосовая заметка",
+      req_source_network: "Сеть", dur_plus: "+15 мин", dur_minus: "−15 мин", dur_conflict: "Нельзя продлить: следующее время уже занято.",
+      dur_min: "Минимальная длительность — 15 минут.", dur_saved: "Длительность: {n} мин" },
+    uz: { cmp_title: "Shikoyat qaydi", cmp_section: "Shikoyatlar", cmp_add: "Shikoyat qo'shish", cmp_none: "Hozircha shikoyat yo'q",
+      cmp_text: "Shikoyat matni", cmp_text_ph: "Bemorni nima bezovta qilmoqda…", cmp_optional: "Matn yoki ovoz — kamida bittasi.",
+      cmp_voice: "Ovozli izoh", cmp_rec_start: "Yozishni boshlash", cmp_rec_stop: "To'xtatish", cmp_rec_hint: "Eng ko'pi 60 soniya. Ovoz bemor fayllarida saqlanadi.",
+      cmp_rec_unsupported: "Bu qurilmada ovoz yozish mavjud emas.", cmp_rec_denied: "Mikrofonga ruxsat berilmadi.", cmp_rec_ready: "Ovozli izoh yozildi.",
+      cmp_rec_stop_first: "Saqlashdan oldin yozishni to'xtating.", cmp_need: "Matn yozing yoki ovoz yozib oling.", cmp_saved: "Shikoyat saqlandi",
+      cmp_visibility: "Kim ko'radi", cmp_vis_doctor: "Faqat shifokorga", cmp_vis_clinic: "Klinikaga",
+      cmp_vis_doctor_hint: "Faqat siz (muallif) ko'rasiz.", cmp_vis_clinic_hint: "Shifokor, qabulxona, egasi va administrator ko'radi.",
+      cmp_show_patient: "Bemorga ko'rsatish", cmp_badge_doctor: "Faqat shifokor", cmp_badge_clinic: "Klinika", cmp_badge_patient: "Bemorga ochiq",
+      cmp_play: "Tinglash", cmp_audio_missing: "Ovoz fayli topilmadi.", cmp_tooth: "Tish", cmp_book: "Qabulga yozish", cmp_book_note: "Shikoyatdan",
+      cmp_tooth_issue: "{n}-tish bo'yicha shikoyat", cmp_voice_note: "Ovozli shikoyat", cmp_voice_only: "Ovozli izoh",
+      req_source_network: "Tarmoq", dur_plus: "+15 daq", dur_minus: "−15 daq", dur_conflict: "Uzaytirib bo'lmaydi: keyingi vaqt band.",
+      dur_min: "Eng kam davomiylik — 15 daqiqa.", dur_saved: "Davomiylik: {n} daq" }
+  };
+  Object.keys(X).forEach(function (l) { Object.assign(STR[l], X[l]); });
+})();
 /* ================= basics ================= */
 var UPPER = [18, 17, 16, 15, 14, 13, 12, 11, 21, 22, 23, 24, 25, 26, 27, 28];
 var LOWER = [48, 47, 46, 45, 44, 43, 42, 41, 31, 32, 33, 34, 35, 36, 37, 38];
@@ -2013,7 +2055,7 @@ var state = {
   modal: null,
   /* v2 modules */
   plan: "", modules: [], branches: [], branchId: "all",
-  chairs: [], waitlist: [], toothHistory: [], diagnoses: [], plans: [], labOrders: [], labs: [], templates: [], documents: [], campaigns: [], messages: [], msgTemplates: [], outbox: [], inventory: [], materialUse: [], suppliers: [], purchases: [], payments: [], payroll: [], shifts: [], audit: [], files: [],
+  chairs: [], waitlist: [], toothHistory: [], diagnoses: [], plans: [], labOrders: [], labs: [], templates: [], documents: [], campaigns: [], messages: [], msgTemplates: [], outbox: [], inventory: [], materialUse: [], suppliers: [], purchases: [], payments: [], payroll: [], shifts: [], audit: [], files: [], complaints: [],
   dashFrom: "", labFilter: "active", plansSearch: "", cashFilter: "today", cashSearch: "", invSearch: "", anFrom: "", anTo: "", pyFrom: "", pyTo: "", pyRows: [], printDoc: null, lastReceipt: null
 };
 var ctx = { p: null, visits: [], teeth: {} };
@@ -2768,7 +2810,7 @@ var MOBILE_TABS = [
 ];
 
 var VIEWS = ["dashboard", "requests", "schedule", "patients", "prices", "cashier", "plans", "lab", "inventory", "marketing", "analytics", "payroll", "documents", "book", "chart", "mine"];
-var NEW_COLLECTIONS = ["fileData", "chairs", "branches", "waitlist", "toothHistory", "diagnoses", "plans", "labOrders", "labs", "templates", "documents", "campaigns", "messages", "msgTemplates", "outbox", "inventory", "materialUse", "suppliers", "purchases", "payments", "payroll", "shifts", "audit", "files"];
+var NEW_COLLECTIONS = ["fileData", "chairs", "branches", "waitlist", "toothHistory", "diagnoses", "plans", "labOrders", "labs", "templates", "documents", "campaigns", "messages", "msgTemplates", "outbox", "inventory", "materialUse", "suppliers", "purchases", "payments", "payroll", "shifts", "audit", "files", "complaints"];
 var BASE_COLLECTIONS = ["doctors", "patients", "appointments", "visits", "slots", "requests", "reqstate", "links", "history", "prices"];
 
 var COLLECTION_GATE = { fileData: "files", inventory: "inventory", materialUse: "inventory", suppliers: "inventory", purchases: "inventory", campaigns: "marketing", outbox: "marketing", payroll: "payroll", plans: "plans", toothHistory: "toothHistory", labOrders: "lab", labs: "lab", documents: "documents", chairs: "chairs", shifts: "shifts", branches: "branches" };
@@ -3041,6 +3083,47 @@ function planTotal(plan) {
 function planVariantTotal(v) { var t = 0; (v.stages || []).forEach(function (st) { (st.items || []).forEach(function (it) { t += (+it.qty || 1) * (+it.price || 0); }); }); return t; }
 function plansFor(pid) { return state.plans.filter(function (x) { return x.patientId === pid; }).sort(function (a, b) { return (b.createdAt || 0) - (a.createdAt || 0); }); }
 function toothHist(pid, f) { var d = state.toothHistory.filter(function (x) { return x.patientId === pid && +x.tooth === +f; })[0]; return d ? (d.items || []) : []; }
+
+/* ---- complaint notes (clinical, per patient / per tooth) ---- */
+function canSeeClinical(role) { return (role == null ? state.role : role) !== "callcenter"; }
+function complaintVisible(c) {
+  if (!c || !isStaff() || !canSeeClinical()) return false;
+  if (c.visibility === "doctor") return !!state.uid && state.uid === c.authorId;
+  return true;
+}
+function visibleComplaints(pid, tooth, generalOnly) {
+  var f = tooth === 0 || tooth == null || tooth === "" ? null : +tooth;
+  return state.complaints.filter(function (c) {
+    if (c.patientId !== pid) return false;
+    if (generalOnly) { if (c.tooth) return false; }
+    else if (f != null && +c.tooth !== f) return false;
+    return complaintVisible(c);
+  }).sort(function (a, b) { return (b.at || 0) - (a.at || 0); });
+}
+function complaintAudioUrl(c) { var d = c && c.audioFileId ? byId(state.fileData, c.audioFileId) : null; return d && d.dataUrl ? d.dataUrl : ""; }
+function complaintBadge(c) {
+  var vis = c.visibility === "clinic" ? t("cmp_badge_clinic") : t("cmp_badge_doctor");
+  return '<span class="pill no-dot">' + esc(vis) + "</span>" + (c.visibleToPatient ? ' <span class="chip">' + esc(t("cmp_badge_patient")) + "</span>" : "");
+}
+function complaintRowHtml(c) {
+  var canBook = canWrite() && !isCallcenter();
+  var meta = [];
+  if (c.tooth) meta.push('<span class="pill no-dot">' + esc(t("cmp_tooth")) + " " + esc(numOf(+c.tooth)) + "</span>");
+  return '<div class="list-row" style="align-items:flex-start">' +
+    '<div class="grow"><span class="t">' + meta.join(" ") + (meta.length ? " " : "") + complaintBadge(c) + "</span>" +
+    (c.text ? '<span class="s" style="white-space:pre-wrap">' + esc(c.text) + "</span>" : '<span class="s muted">' + esc(t("cmp_voice_only")) + "</span>") +
+    '<span class="s muted">' + esc(c.authorName || "—") + " · " + esc(new Date(c.at || Date.now()).toLocaleString()) + "</span>" +
+    (c.audioFileId ? '<div style="margin-top:4px"><button type="button" class="btn btn-sm" data-act="cmp-play" data-id="' + esc(c.id) + '">&#9654; ' + esc(t("cmp_play")) + "</button></div>" : "") +
+    "</div>" + (canBook ? '<button type="button" class="btn btn-sm" data-act="cmp-book" data-id="' + esc(c.id) + '">' + esc(t("cmp_book")) + "</button>" : "") + "</div>";
+}
+function complaintListHtml(p, tooth, card, generalOnly) {
+  if (!p || !isStaff() || !canSeeClinical()) return "";
+  var list = visibleComplaints(p.id, tooth, generalOnly), canAdd = canWrite() && !isCallcenter();
+  var head = '<div class="sect-title"' + (card ? "" : ' style="margin-top:12px"') + "><span>" + esc(t("cmp_section")) + "</span>" +
+    (canAdd ? '<button type="button" class="btn btn-sm btn-ghost" data-act="cmp-new" data-pid="' + esc(p.id) + '" data-tooth="' + esc(tooth == null ? "" : tooth) + '">+ ' + esc(t("cmp_add")) + "</button>" : "") + "</div>";
+  var body = list.length ? '<div class="list">' + list.map(complaintRowHtml).join("") + "</div>" : '<p class="muted">' + esc(t("cmp_none")) + "</p>";
+  return card ? '<div class="card pad">' + head + body + "</div>" : head + body;
+}
 function messagesFor(pid) { return state.messages.filter(function (x) { return x.patientId === pid; }).sort(function (a, b) { return (a.at || 0) - (b.at || 0); }); }
 function filesFor(pid) { return state.files.filter(function (x) { return x.patientId === pid; }); }
 function nextReceiptNo() {
@@ -3172,6 +3255,7 @@ function tabMainHtml(p) {
   h += '<div class="card pad"><h3 class="sect-title">' + esc(t("visit_history")) + '</h3>' + (vis.length ? '<div class="timeline">' + vis.slice().reverse().slice(0, 8).map(function (v) {
     return '<div class="tl done"><b>' + esc(fmtLong(v.date)) + "</b> <span class=\"dt\">" + esc(doctorLabel(v.doctorId, v.doctorName)) + '</span><div class="dt">' + esc((v.procedures || []).map(function (x) { return procLabel(x.type) + (x.tooth ? " · " + numOf(+x.tooth) : ""); }).join(", ") || reasonLabel(v) || "—") + "</div></div>";
   }).join("") + "</div>" : '<p class="muted">' + esc(t("no_visits")) + "</p>") + "</div>";
+  h += complaintListHtml(p, null, true);
   h += "</div>";
   return h;
 }
@@ -3181,11 +3265,14 @@ function tabToothHtml(p) {
   var hist = [];
   if (moduleOn("toothHistory")) state.toothHistory.filter(function (x) { return x.patientId === p.id; }).forEach(function (d) { hist.push({ tooth: d.tooth, items: d.items || [], doc: d }); });
   hist.sort(function (a, b) { return a.tooth - b.tooth; });
-  var addable = canWrite() ? '<button class="btn btn-sm btn-ghost" data-act="th-add" data-tooth="' + esc(state.chart.tooth || "") + '">+ ' + esc(t("th_add")) + "</button>" : "";
-  if (!hist.length) return '<div class="empty"><strong>' + esc(t("no_tooth_records")) + "</strong><span>" + esc(t("no_tooth_records_sub")) + "</span>" + addable + "</div>";
+  var canAct = canWrite() && isStaff() && canSeeClinical();
+  var cmpBtn = function (f) { return canAct ? '<button class="btn btn-sm btn-ghost" data-act="cmp-new" data-pid="' + esc(p.id) + '" data-tooth="' + esc(f == null ? "" : f) + '">+ ' + esc(t("cmp_add")) + "</button>" : ""; };
+  var bookBtn = function (f) { return canAct ? '<button class="btn btn-sm btn-ghost" data-act="cmp-book-tooth" data-pid="' + esc(p.id) + '" data-tooth="' + esc(f == null ? "" : f) + '">' + esc(t("cmp_book")) + "</button>" : ""; };
+  var addable = canWrite() ? '<button class="btn btn-sm btn-ghost" data-act="th-add" data-tooth="' + esc(state.chart.tooth || "") + '">+ ' + esc(t("th_add")) + "</button>" + cmpBtn(state.chart.tooth) : "";
+  if (!hist.length) return '<div class="empty"><strong>' + esc(t("no_tooth_records")) + "</strong><span>" + esc(t("no_tooth_records_sub")) + "</span>" + addable + "</div>" + complaintListHtml(p, null, false, false);
   return '<div class="list">' + hist.map(function (x) {
-    return '<div class="list-row"><span class="avatar" style="border-radius:8px">' + esc(numOf(+x.tooth)) + '</span><div class="grow"><span class="t">' + esc(toothName(+x.tooth)) + '</span><span class="s">' + esc(x.items.map(function (it) { return (it.proc || "") + (it.date ? " · " + it.date : "") + (it.canal ? " · " + it.canal + " mm" : ""); }).join(" | ") || "—") + "</span></div>" + (canWrite() ? '<button class="btn btn-sm btn-ghost" data-act="th-add" data-tooth="' + esc(x.tooth) + '">+ ' + esc(t("add")) + "</button>" : "") + "</div>";
-  }).join("") + "</div>";
+    return '<div class="list-row"><span class="avatar" style="border-radius:8px">' + esc(numOf(+x.tooth)) + '</span><div class="grow"><span class="t">' + esc(toothName(+x.tooth)) + '</span><span class="s">' + esc(x.items.map(function (it) { return (it.proc || "") + (it.date ? " · " + it.date : "") + (it.canal ? " · " + it.canal + " mm" : ""); }).join(" | ") || "—") + "</span></div>" + (canWrite() ? '<button class="btn btn-sm btn-ghost" data-act="th-add" data-tooth="' + esc(x.tooth) + '">+ ' + esc(t("add")) + "</button>" : "") + cmpBtn(x.tooth) + bookBtn(x.tooth) + "</div>";
+  }).join("") + "</div>" + complaintListHtml(p, null, false, false);
 }
 function tabVisitsHtml(p) {
   if (!ctx.visits.length) return '<div class="empty"><strong>' + esc(t("no_visits")) + "</strong><span>" + esc(t("no_visits_sub")) + "</span></div>";
@@ -3786,6 +3873,7 @@ function apptRow(a) {
   }
   if (a.status === "done" && canSeeChart()) acts = '<button class="btn btn-sm" data-act="patient" data-id="' + esc(a.patientId) + '">' + esc(t("open_chart")) + "</button>";
   if (desk) acts += '<button class="btn btn-sm btn-ghost" data-act="appt-edit" data-id="' + esc(a.id) + '">' + esc(t("edit")) + "</button>";
+  if (desk && apptActive(a) && a.status !== "done") acts += '<button type="button" class="btn btn-sm btn-ghost" data-act="appt-dur" data-id="' + esc(a.id) + '" data-d="15">' + esc(t("dur_plus")) + '</button><button type="button" class="btn btn-sm btn-ghost" data-act="appt-dur" data-id="' + esc(a.id) + '" data-d="-15">' + esc(t("dur_minus")) + "</button>";
   return '<article class="appt s-' + esc(a.status) + '"><div class="time">' + esc(a.time || "--:--") + "<small>" + esc(t("to_time", { t: end })) + "</small></div>" +
     '<div><div class="who-line">' + nameHtml + " " + (a.demo ? '<span class="tag">' + esc(t("example")) + "</span> " : "") + (a.source === "online" ? '<span class="tag online">' + esc(t("online")) + "</span>" : "") + "</div>" +
     '<div class="meta">' + esc(reasonLabel(a) || t("no_reason")) + " · " + esc(doc) + esc(wait) + "</div>" +
@@ -3847,10 +3935,16 @@ function reqList() {
     return (b.createdAt || 0) - (a.createdAt || 0);
   });
 }
+function reasonMediaHtml(r) {
+  if (!r) return "";
+  var h = "";
+  if (r.reasonKind === "audio" && r.audioData) h += '<audio controls preload="none" src="' + esc(r.audioData) + '" style="height:34px;max-width:100%;margin-top:4px"></audio>';
+  if (r.reasonText) h += '<div class="note" style="margin-top:4px;font-weight:400">' + esc(r.reasonText) + "</div>";
+  return h;
+}
 function qCard(r) {
   var st = reqStatus(r), s = byId(state.reqstate, r.id), contacts = (s && s.contacts) || [];
-  var isOpen = st === "requested" || st === "contacted", acts = [];
-  acts.push('<a class="btn btn-sm" href="tel:' + esc(String(r.phone || "").replace(/[^\d+]/g, "")) + '">' + esc(t("q_call")) + "</a>");
+  var isOpen = st === "requested" || st === "contacted", acts = [];  acts.push('<a class="btn btn-sm" href="tel:' + esc(String(r.phone || "").replace(/[^\d+]/g, "")) + '">' + esc(t("q_call")) + "</a>");
   if (canWrite()) acts.push('<button class="btn btn-sm" data-act="req-contact" data-id="' + esc(r.id) + '">' + esc(t("q_mark_contacted")) + "</button>");
   if (isOpen && canWrite()) {
     acts.push('<button class="btn btn-sm btn-primary" data-act="req-confirm" data-id="' + esc(r.id) + '">' + esc(t("q_confirm")) + "</button>");
@@ -3865,11 +3959,12 @@ function qCard(r) {
   if (st === "declined" && s && s.declineNote) log += '<div class="ql"><b>' + esc(t("q_decline")) + "</b>" + (s.declinedBy ? "<small>" + esc(s.declinedBy) + "</small>" : "") + "<em>" + esc(s.declineNote) + "</em></div>";
   return '<article class="qcard q-' + esc(st) + '"><div><div class="qhead"><span class="avatar">' + esc(initials(r.name)) + '</span><span class="nm">' + esc(r.name) + '</span><span class="pill s-' + esc(st) + '">' + esc(t("st_" + st)) + "</span>" +
     (r.source === "public" || r.channel === "public" ? '<span class="tag online">' + esc(t("q_source_public")) + "</span>" : "") +
+    (r.source === "network" ? '<span class="tag online">' + esc(t("req_source_network")) + "</span>" : "") +
     '<a class="qphone" href="tel:' + esc(String(r.phone || "").replace(/[^\d+]/g, "")) + '">' + esc(r.phone) + "</a>" +
     '<span class="age">' + esc(t("q_created")) + " · " + esc(agoStr(r.createdAt)) + "</span></div>" +
     '<div class="qinfo"><div><span>' + esc(t("q_doctor")) + "</span><b>" + esc(doctorLabel(r.doctorId, r.doctorName)) + "</b></div>" +
     "<div><span>" + esc(t("q_when")) + "</span><b>" + esc(fmtShort(r.date) + " · " + r.time) + "</b></div>" +
-    "<div><span>" + esc(t("q_reason")) + "</span><b>" + esc(reasonLabel(r) || t("no_reason")) + "</b></div></div>" +
+    "<div><span>" + esc(t("q_reason")) + "</span><b>" + esc(reasonLabel(r) || t("no_reason")) + "</b>" + reasonMediaHtml(r) + "</div></div>" +
     '<div class="qlog"><div class="qlt">' + esc(t("q_contact_log")) + " · " + contacts.length + "</div>" + (log || '<div class="ql"><span>' + esc(t("q_no_contacts")) + "</span></div>") + "</div></div>" +
     '<div class="qacts">' + acts.join("") + "</div></article>";
 }
@@ -3932,7 +4027,7 @@ function openContactModal(id) {
   });
 }
 function qBriefHtml(r) {
-  return '<div class="qbrief"><b>' + esc(r.name) + "</b><span>" + esc(r.phone) + "</span><span class=\"muted\">" + esc(doctorLabel(r.doctorId, r.doctorName)) + " · " + esc(fmtShort(r.date) + " " + r.time) + " · " + esc(reasonLabel(r) || t("no_reason")) + "</span></div>";
+  return '<div class="qbrief"><b>' + esc(r.name) + "</b>" + (r.source === "network" ? ' <span class="tag online">' + esc(t("req_source_network")) + "</span>" : "") + "<span>" + esc(r.phone) + "</span><span class=\"muted\">" + esc(doctorLabel(r.doctorId, r.doctorName)) + " · " + esc(fmtShort(r.date) + " " + r.time) + " · " + esc(reasonLabel(r) || t("no_reason")) + "</span>" + reasonMediaHtml(r) + "</div>";
 }
 function renderSchedule() {
   var root = $("#view-schedule");
@@ -4119,7 +4214,8 @@ function paletteHtml(q) {
   var rows = [];
   if (canSeeChart()) state.patients.forEach(function (p) {
     if (rows.length >= 6) return;
-    if (!q || (p.name || "").toLowerCase().indexOf(q) >= 0 || (digits(q) && digits(p.phone).indexOf(digits(q)) >= 0)) rows.push({ ic: "person", t: p.name, s: p.phone || "", act: "patient", id: p.id });
+    var dq = digits(q);
+    if (!q || (p.name || "").toLowerCase().indexOf(q) >= 0 || (dq && digits(p.phone).indexOf(dq) >= 0) || String(p.id || "").toLowerCase().indexOf(q) >= 0) rows.push({ ic: "person", t: p.name, s: (p.phone || "") + (String(p.id || "").toLowerCase().indexOf(q) === 0 && q ? " · " + p.id : ""), act: "patient", id: p.id });
   });
   NAV_MAIN.concat(NAV_OPS, NAV_MORE).forEach(function (n) {
     if (rows.length >= 12) return;
@@ -4269,6 +4365,134 @@ function openToothHistoryModal(patientId, tooth) {
   }, null);
 }
 function addToothHistory(patientId, tooth) { openToothHistoryModal(patientId, tooth); }
+
+/* ---- complaint notes: voice recorder + modal ---- */
+var cmpRec = { mr: null, stream: null, timer: 0, started: 0 };
+function cmpExt(mime) {
+  var m = String(mime || "");
+  if (m.indexOf("mp4") >= 0 || m.indexOf("aac") >= 0) return ".m4a";
+  if (m.indexOf("ogg") >= 0) return ".ogg";
+  if (m.indexOf("mpeg") >= 0) return ".mp3";
+  return ".webm";
+}
+function cmpRecStop(cancel) {
+  clearInterval(cmpRec.timer); cmpRec.timer = 0;
+  var mr = cmpRec.mr; cmpRec.mr = null;
+  if (mr && mr.state !== "inactive") { if (cancel) mr.onstop = null; try { mr.stop(); } catch (e) { } }
+  if (cmpRec.stream) { try { cmpRec.stream.getTracks().forEach(function (tr) { tr.stop(); }); } catch (e) { } cmpRec.stream = null; }
+  var btn = $("#cmpRecBtn"); if (btn) { btn.textContent = t("cmp_rec_start"); btn.classList.remove("btn-danger"); }
+}
+function cmpAudioBox() {
+  var box = $("#cmpAudioBox"); if (!box) return;
+  var m = state.modal && state.modal.cmp, a = m && m.audio;
+  if (!a || !a.dataUrl) { box.innerHTML = ""; return; }
+  box.innerHTML = '<audio controls src="' + esc(a.dataUrl) + '" style="width:100%;margin-top:8px"></audio><div class="row" style="margin-top:6px;align-items:center"><span class="muted" style="font-size:12px">' + esc(Math.max(1, Math.round((a.size || 0) / 1024)) + " KB") + '</span><button type="button" class="btn btn-sm btn-ghost" data-act="cmp-rec-clear">' + esc(t("delete")) + "</button></div>";
+}
+function cmpRecStart() {
+  if (!state.modal || !state.modal.cmp) return;
+  if (cmpRec.mr) { cmpRecStop(false); return; }
+  if (!(window.MediaRecorder && navigator.mediaDevices && navigator.mediaDevices.getUserMedia)) { toast(t("cmp_rec_unsupported"), true); return; }
+  navigator.mediaDevices.getUserMedia({ audio: true }).then(function (stream) {
+    if (!state.modal || !state.modal.cmp) { try { stream.getTracks().forEach(function (tr) { tr.stop(); }); } catch (e) { } return; }
+    var mr;
+    try { mr = new MediaRecorder(stream, { audioBitsPerSecond: 32000 }); } catch (e) { try { mr = new MediaRecorder(stream); } catch (x) { toast(t("cmp_rec_unsupported"), true); try { stream.getTracks().forEach(function (tr) { tr.stop(); }); } catch (y) { } return; } }
+    cmpRec.stream = stream; cmpRec.mr = mr; cmpRec.started = Date.now(); mr._chunks = [];
+    mr.ondataavailable = function (ev) { if (ev.data && ev.data.size) mr._chunks.push(ev.data); };
+    mr.onstop = function () {
+      var mime = mr.mimeType || "audio/webm", parts = mr._chunks || [];
+      if (cmpRec.stream) { try { cmpRec.stream.getTracks().forEach(function (tr) { tr.stop(); }); } catch (e) { } cmpRec.stream = null; }
+      clearInterval(cmpRec.timer); cmpRec.timer = 0;
+      var b = $("#cmpRecBtn"); if (b) { b.textContent = t("cmp_rec_start"); b.classList.remove("btn-danger"); }
+      if (!parts.length) return;
+      var blob = new Blob(parts, { type: mime });
+      if (blob.size > FILE_MAX) { toast(t("files_too_big"), true); return; }
+      var rd = new FileReader();
+      rd.onload = function () {
+        var cm = state.modal && state.modal.cmp; if (!cm) return;
+        cm.audio = { dataUrl: rd.result, mime: mime, size: blob.size };
+        cmpAudioBox(); toast(t("cmp_rec_ready"));
+      };
+      rd.readAsDataURL(blob);
+    };
+    mr.start();
+    var btn = $("#cmpRecBtn"); if (btn) { btn.textContent = t("cmp_rec_stop"); btn.classList.add("btn-danger"); }
+    var tm = $("#cmpTimer"); if (tm) tm.textContent = "0:00 / 1:00";
+    cmpRec.timer = setInterval(function () {
+      var s = Math.floor((Date.now() - cmpRec.started) / 1000), e = $("#cmpTimer");
+      if (e) e.textContent = "0:" + pad(Math.min(59, s)) + " / 1:00";
+      if (s >= 60) cmpRecStop(false);
+    }, 250);
+  }, function () { toast(t("cmp_rec_denied"), true); });
+}
+function openComplaintModal(pid, tooth) {
+  if (!canWrite() || !isStaff() || !canSeeClinical()) return;
+  var p = byId(state.patients, pid); if (!p) return;
+  var m = { pid: pid, tooth: tooth ? +tooth : null, visitId: (state.chart.draft && state.chart.draft.id) || null, audio: null };
+  var body = '<div class="stack">' +
+    '<div class="field"><label class="lbl" for="cmpText">' + esc(t("cmp_text")) + '</label><textarea id="cmpText" rows="4" placeholder="' + esc(t("cmp_text_ph")) + '"></textarea><div class="hint">' + esc(t("cmp_optional")) + "</div></div>" +
+    '<div class="field"><span class="lbl">' + esc(t("cmp_voice")) + '</span><div class="row" style="align-items:center"><button type="button" class="btn btn-sm" id="cmpRecBtn" data-act="cmp-rec">' + esc(t("cmp_rec_start")) + '</button><span class="mono" id="cmpTimer" style="font-size:12.5px">0:00 / 1:00</span></div><div id="cmpAudioBox"></div><div class="hint">' + esc(t("cmp_rec_hint")) + "</div></div>" +
+    '<div class="field"><label class="lbl" for="cmpTooth">' + esc(t("cmp_tooth")) + '</label><select id="cmpTooth">' + toothOptions(m.tooth) + "</select></div>" +
+    '<div class="field"><span class="lbl">' + esc(t("cmp_visibility")) + '</span><div class="radios"><label><input type="radio" name="cmpVis" value="doctor" checked> ' + esc(t("cmp_vis_doctor")) + '</label><label><input type="radio" name="cmpVis" value="clinic"> ' + esc(t("cmp_vis_clinic")) + '</label></div><div class="hint">' + esc(t("cmp_vis_doctor_hint")) + " " + esc(t("cmp_vis_clinic_hint")) + "</div></div>" +
+    '<label class="chk"><input type="checkbox" id="cmpPatient"> ' + esc(t("cmp_show_patient")) + "</label>" +
+    ERR_HTML + "</div>";
+  openModal(t("cmp_title") + " · " + (p.name || ""), body, footSave(t("save")), saveComplaint);
+  state.modal.cmp = m;
+  state.modal.onClose = function () { cmpRecStop(true); };
+}
+function saveComplaint() {
+  var m = state.modal && state.modal.cmp; if (!m) return;
+  if (cmpRec.mr) { mErr(t("cmp_rec_stop_first")); return; }
+  var text = $("#cmpText") ? $("#cmpText").value.trim() : "";
+  var visEl = document.querySelector('input[name="cmpVis"]:checked');
+  var vis = visEl && visEl.value === "clinic" ? "clinic" : "doctor";
+  var pt = $("#cmpPatient") ? $("#cmpPatient").checked : false;
+  var tooth = $("#cmpTooth") ? $("#cmpTooth").value : "";
+  if (!text && !m.audio) { mErr(t("cmp_need")); return; }
+  var id = uid("cmp_"), at = Date.now(), fid = m.audio ? uid("fil_") : null;
+  var jobs = [];
+  if (m.audio) {
+    jobs.push(function () { return save("fileData", fid, { dataUrl: m.audio.dataUrl }); });
+    jobs.push(function () { return save("files", fid, { patientId: m.pid, visitId: m.visitId || null, name: "complaint-" + ymd(new Date(at)) + cmpExt(m.audio.mime), mime: m.audio.mime, size: m.audio.size, at: at, by: state.uid, dataId: fid, source: "complaint" }); });
+  }
+  jobs.push(function () {
+    return save("complaints", id, { patientId: m.pid, tooth: tooth ? +tooth : null, visitId: m.visitId || null, text: text, audioFileId: fid, visibility: vis, visibleToPatient: !!pt, authorId: state.uid, authorName: state.userName || "", authorRole: state.role || "", at: at });
+  });
+  chain(jobs).then(function (ok) {
+    if (!ok) return;
+    closeModal(); toast(t("cmp_saved")); requestRender();
+  });
+}
+function openComplaintAudio(id) {
+  var c = byId(state.complaints, id); if (!c || !complaintVisible(c)) return;
+  var url = complaintAudioUrl(c);
+  if (!url) { toast(t("cmp_audio_missing"), true); return; }
+  openModal(t("cmp_voice"), '<audio controls autoplay src="' + esc(url) + '" style="width:100%"></audio>', '<button type="button" class="btn" data-act="modal-close">' + esc(t("close")) + '</button><button type="button" class="btn btn-primary" data-act="file-dl" data-id="' + esc(c.audioFileId) + '">' + esc(t("download")) + "</button>", null, null);
+}
+function bookComplaint(id) {
+  var c = byId(state.complaints, id); if (!c || !complaintVisible(c)) return;
+  openApptModal({ pid: c.patientId, reason: "__other", reasonOther: (c.text ? c.text.slice(0, 160) : t("cmp_voice_note")), tooth: c.tooth || null, note: t("cmp_book_note") + (c.tooth ? " · " + t("cmp_tooth") + " " + numOf(+c.tooth) : "") });
+}
+function bookToothComplaint(pid, tooth) {
+  var f = +tooth || null;
+  openApptModal({ pid: pid, reason: "__other", reasonOther: t("cmp_tooth_issue", { n: f ? numOf(f) : "" }), tooth: f, note: t("cmp_book_note") + (f ? " · " + t("cmp_tooth") + " " + numOf(f) : "") });
+}
+
+/* ---- quick duration adjustments from the appointment card ---- */
+function adjustApptDuration(id, delta) {
+  if (!canWrite() || isCallcenter()) return;
+  var a = byId(state.appointments, id); if (!a) return;
+  var cur = +a.duration || 30, dur = Math.max(15, cur + (delta < 0 ? -15 : 15));
+  if (dur === cur) { toast(t("dur_min"), true); return; }
+  var busy = busyCells(a.doctorId, a.date, a.id);
+  if (dur > cur && (!slotFits(a.time, dur, busy) || toMin(a.time) + dur > WORK.end)) { toast(t("dur_conflict"), true); return; }
+  var old = clone(a), data = Object.assign({}, a); delete data.id; data.duration = dur;
+  save("appointments", id, data).then(function (ok) {
+    if (!ok) return;
+    syncSlots(old, Object.assign({ id: id }, data), id, data.demo).then(function () {
+      toast(t("dur_saved", { n: dur })); requestRender();
+    });
+  });
+}
 
 /* ---- templates ---- */
 function openTemplateModal(tpl) {
@@ -4431,11 +4655,13 @@ function openApptModal(opts) {
   var a = opts.id ? byId(state.appointments, opts.id) : null, docs = sortedDoctors();
   var ap = { id: a ? a.id : null, old: a ? clone(a) : null, mode: "existing", pid: a ? a.patientId : (opts.pid || ""),
     doctorId: a ? a.doctorId : (opts.doctorId || (state.doctorId !== "all" ? state.doctorId : (docs[0] ? docs[0].id : ""))),
-    date: a ? a.date : (opts.date || state.date), time: a ? a.time : "", duration: a ? (a.duration || 30) : 30,
-    reason: a ? (a.reason || (a.reasonOther ? "__other" : "")) : "", reasonOther: a ? (a.reasonOther || "") : "", status: a ? a.status : "scheduled" };
+    date: a ? a.date : (opts.date || state.date), time: a ? a.time : "", duration: a ? (a.duration || 30) : (opts.duration || 30),
+    reason: a ? (a.reason || (a.reasonOther ? "__other" : "")) : (opts.reason || (opts.reasonOther ? "__other" : "")),
+    reasonOther: a ? (a.reasonOther || "") : (opts.reasonOther || ""), status: a ? a.status : "scheduled" };
   if (!ap.time) ap.time = firstFree(ap.doctorId, ap.date, ap.duration, ap.id, false);
   var durs = [15, 30, 45, 60, 90, 120];
   var body = '<div class="stack">' +
+    (opts.note ? '<div class="notice info" style="margin:0">' + esc(opts.note) + "</div>" : "") +
     (a ? "" : '<div class="radios" id="apMode"><label><input type="radio" name="pmode" value="existing" checked> ' + esc(t("existing_patient")) + '</label><label><input type="radio" name="pmode" value="new"> ' + esc(t("new_patient_opt")) + "</label></div>") +
     '<div id="apExisting">' + pickerHtml(ap.pid) + "</div>" +
     '<div id="apNew" class="grid2" hidden><div class="field"><label class="lbl" for="apNName">' + esc(t("full_name")) + '</label><input type="text" id="apNName" autocomplete="off"></div><div class="field"><label class="lbl" for="apNPhone">' + esc(t("phone")) + '</label><input type="tel" id="apNPhone"></div></div>' +
@@ -4683,8 +4909,9 @@ function toothPanelHtml() {
   var tt = ctx.teeth[f], st = tt ? tt.status : "healthy";
   var h = '<div class="tooth-head"><h3><span class="fdi">' + numOf(f) + "</span>" + esc(toothName(f)) + '</h3><p class="muted">' + esc(t("tooth_codes", { u: uniNum(f), f: f })) + " · " + esc(t("status_" + st)) + "</p></div>";
   h += '<div class="tooth-stats"><div><span>' + esc(t("visit_count")) + "</span><b>" + (tt ? tt.count : 0) + "</b></div><div><span>" + esc(t("first")) + "</span><b>" + (tt && tt.first ? esc(fmtShort(tt.first)) : "—") + "</b></div><div><span>" + esc(t("last")) + "</span><b>" + (tt && tt.last ? esc(fmtShort(tt.last)) : "—") + "</b></div></div>";
-  if (!ro) h += '<div class="foot-row" style="margin:0 0 8px"><button class="btn btn-primary btn-sm" data-act="proc-for-tooth" data-f="' + f + '">' + esc(t("add_proc_tooth")) + "</button></div>";
-  if (!tt) return h + '<div class="empty"><strong>' + esc(t("no_tooth_records")) + "</strong><span>" + esc(t("no_tooth_records_sub")) + "</span></div>";
+  if (!ro) h += '<div class="foot-row" style="margin:0 0 8px"><button class="btn btn-primary btn-sm" data-act="proc-for-tooth" data-f="' + f + '">' + esc(t("add_proc_tooth")) + "</button>" + (isStaff() && canSeeClinical() && canWrite() && !isCallcenter() ? '<button class="btn btn-sm btn-ghost" data-act="cmp-book-tooth" data-pid="' + esc(ctx.p.id) + '" data-tooth="' + f + '">' + esc(t("cmp_book")) + "</button>" : "") + "</div>";
+  var cmpList = complaintListHtml(ctx.p, f, false);
+  if (!tt) return h + '<div class="empty"><strong>' + esc(t("no_tooth_records")) + "</strong><span>" + esc(t("no_tooth_records_sub")) + "</span></div>" + cmpList;
   var ts = {}; tt.entries.forEach(function (e) { (e.proc.tools || []).forEach(function (k) { ts[k] = (ts[k] || 0) + 1; }); });
   var tk = Object.keys(ts).sort(function (a, b) { return ts[b] - ts[a]; });
   if (tk.length) h += '<div class="sect-title">' + esc(t("tools_used")) + '</div><div class="chips" style="margin:0 0 8px">' + tk.map(function (k) { return '<span class="chip">' + esc(toolLabel(k)) + " <em>×" + ts[k] + "</em></span>"; }).join("") + "</div>";
@@ -4693,7 +4920,7 @@ function toothPanelHtml() {
     return '<li class="tl"><div class="dt">' + esc(fmtDate(v.date)) + '</div><div><div class="ti">' + esc(procLabel(p.type)) + esc(surfTxt(p)) + (p.price ? ' <span class="muted" style="font-weight:600">· ' + esc(money(p.price)) + "</span>" : ' <span class="tag">' + esc(t("by_agreement")) + "</span>") + '</div><div class="muted">' + esc(doctorLabel(v.doctorId, v.doctorName)) + "</div>" + toolChips(p) +
       (p.note ? '<div class="note">' + esc(p.note) + "</div>" : "") + (v.notes ? '<div class="note">' + esc(v.notes) + "</div>" : "") + "</div></li>";
   }).join("") + "</ol>";
-  return h;
+  return h + cmpList;
 }
 function visitHtml(v, ro) {
   var open = state.chart.openVisits[v.id] ? " open" : "", total = visitTotal(v);
@@ -5297,6 +5524,13 @@ document.addEventListener("click", function (e) {
     case "shift-edit": { var sh = byId(state.shifts, id); if (sh) openShiftModal(sh.doctorId, sh.date); break; }
     case "shift-del": if (id) { removeDoc("shifts", id).then(function (ok) { if (ok) closeModal(); }); } break;
     case "th-add": openToothHistoryModal(state.route.id, el.dataset.tooth || state.chart.tooth); break;
+    case "cmp-new": openComplaintModal(el.dataset.pid || state.route.id, el.dataset.tooth); break;
+    case "cmp-rec": cmpRecStart(); break;
+    case "cmp-rec-clear": if (state.modal && state.modal.cmp) { state.modal.cmp.audio = null; cmpAudioBox(); } break;
+    case "cmp-play": openComplaintAudio(id); break;
+    case "cmp-book": bookComplaint(id); break;
+    case "cmp-book-tooth": bookToothComplaint(el.dataset.pid || state.route.id, el.dataset.tooth || state.chart.tooth); break;
+    case "appt-dur": adjustApptDuration(id, +el.dataset.d || 0); break;
     case "th-tooth": openToothSheet(state.route.id, el.dataset.tooth); break;
     case "tpl-apply": applyTemplate(id); break;
     case "tpl-new": closeModal(); setTimeout(function () { openTemplateModal(null); }, 30); break;
