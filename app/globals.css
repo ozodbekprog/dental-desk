@@ -1,4 +1,11 @@
 @import "tailwindcss";
+@import "./fonts.css";
+
+:root {
+  --font-manrope: "Manrope", ui-sans-serif, system-ui, sans-serif;
+  --font-onest: "Onest", ui-sans-serif, system-ui, sans-serif;
+  --font-plex-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+}
 
 @theme inline {
   --color-ink: #13262a;

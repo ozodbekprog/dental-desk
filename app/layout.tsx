@@ -1,26 +1,7 @@
 import type { Metadata, Viewport } from "next";
-import { Manrope, Onest, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
 
 export const viewport: Viewport = { themeColor: "#0E7C86", width: "device-width", initialScale: 1 };
-
-const manrope = Manrope({
-  variable: "--font-manrope",
-  subsets: ["latin", "cyrillic"],
-  weight: ["500", "600", "700", "800"],
-});
-
-const onest = Onest({
-  variable: "--font-onest",
-  subsets: ["latin", "cyrillic"],
-  weight: ["400", "500", "600", "700"],
-});
-
-const plexMono = IBM_Plex_Mono({
-  variable: "--font-plex-mono",
-  subsets: ["latin", "cyrillic"],
-  weight: ["400", "500", "600"],
-});
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://dentaldesk.uz";
 
@@ -72,9 +53,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="uz">
-      <body
-        className={`${manrope.variable} ${onest.variable} ${plexMono.variable} antialiased`}
-      >
+      <body className="antialiased">
         {children}
       </body>
     </html>
