@@ -1,4 +1,4 @@
-import type { DoctorProfile, NetworkBooking } from "@prisma/client";
+import type { DoctorProfile, NetworkBooking, TreatmentRecord } from "@prisma/client";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { jsonError } from "@/lib/util";
@@ -7,6 +7,7 @@ import {
   type DoctorBookingDTO,
   type DoctorCounts,
   type DoctorProfileDTO,
+  type TreatmentDTO,
 } from "@/components/doctor/types";
 
 /**
@@ -84,12 +85,37 @@ export function toBookingDTO(booking: BookingWithClinic): DoctorBookingDTO {
   };
 }
 
-const RANK: Record<string, number> = { requested: 0, confirmed: 1, declined: 2 };
+export function toTreatmentDTO(record: TreatmentRecord): TreatmentDTO {
+  return {
+    id: record.id,
+    visitId: record.visitId,
+    bookingId: record.bookingId,
+    patientName: record.patientName,
+    patientPhone: record.patientPhone,
+    date: record.date,
+    tooth: record.tooth,
+    procedure: record.procedure,
+    surfaces: record.surfaces,
+    note: record.note,
+    createdAt: record.createdAt.toISOString(),
+  };
+}
 
-/** Pending requests first, then confirmed by date/time, then declined. */
+const RANK: Record<string, number> = {
+  requested: 0,
+  confirmed: 1,
+  declined: 2,
+  completed: 3,
+  cancelled: 4,
+};
+
+/** Pending requests first, then confirmed by date/time, then the rest. */
 export async function listDoctorBookings(doctorId: string): Promise<DoctorBookingDTO[]> {
   const rows = await prisma.networkBooking.findMany({
-    where: { doctorId, status: { in: ["requested", "confirmed", "declined"] } },
+    where: {
+      doctorId,
+      status: { in: ["requested", "confirmed", "declined", "completed", "cancelled"] },
+    },
     include: { clinic: { select: { name: true } } },
     orderBy: { createdAt: "desc" },
   });

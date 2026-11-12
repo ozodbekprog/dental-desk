@@ -41,6 +41,26 @@ export type DoctorBookingDTO = {
   confirmedAt: string | null;
 };
 
+export type TreatmentDTO = {
+  id: string;
+  visitId: string;
+  bookingId: string | null;
+  patientName: string;
+  patientPhone: string;
+  date: string;
+  tooth: number;
+  procedure: string;
+  surfaces: string;
+  note: string;
+  createdAt: string;
+};
+
+export type TreatmentDraftItem = {
+  tooth: number;
+  procedure: string;
+  surfaces: string;
+};
+
 export type DoctorCounts = {
   requested: number;
   confirmed: number;

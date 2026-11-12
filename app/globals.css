@@ -170,8 +170,43 @@ body {
   box-shadow: 0 30px 60px -42px rgba(9, 56, 60, 0.55);
 }
 
+@keyframes dd-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.dd-chart-line {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: dd-draw 1.2s cubic-bezier(0.22, 1, 0.36, 1) 0.1s forwards;
+}
+
+@keyframes dd-grow {
+  from {
+    transform: scaleY(0);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+
+.dd-bar {
+  transform-origin: bottom;
+  animation: dd-grow 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .dd-rise {
+    animation: none;
+  }
+
+  .dd-chart-line {
+    animation: none;
+    stroke-dashoffset: 0;
+  }
+
+  .dd-bar {
     animation: none;
   }
 

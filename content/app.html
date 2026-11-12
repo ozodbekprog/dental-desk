@@ -323,7 +323,7 @@ var STR = {
     nav_ai: "Assistant",
     topbar_sub: "Clinic workspace",
     search: "Search",
-    search_ph: "Search patients, appointments…",
+    search_ph: "Search patients…",
     search_hint: "Name, phone, date or an action",
     qk_new_appt: "Book a patient now",
     qk_new_patient: "Add to the patient list",
@@ -654,9 +654,9 @@ var STR = {
     min: "min",
     more_tools: "More tools",
     msg_queued: "Message queued",
-    n_done: "{n} done",
-    n_in_chair: "{n} in the chair",
-    n_waiting: "{n} waiting",
+    n_done: "done",
+    n_in_chair: "in the chair",
+    n_waiting: "waiting",
     nav_patients: "Patients",
     nav_settings: "Settings",
     new_patient: "New patient",
@@ -676,7 +676,7 @@ var STR = {
     nothing_ahead: "Nothing scheduled for {who}.",
     num_fdi: "FDI",
     num_uni: "Universal",
-    of_32: "of 32 teeth",
+    of_32: "{n} of 32 teeth",
     off_today: "Not on shift today",
     on_duty: "On shift",
     online: "Online",
@@ -706,7 +706,6 @@ var STR = {
     search_patients: "Search patients",
     set_time: "Set a time",
     show_roots: "X-ray roots",
-    showing: "Showing",
     start_visit: "Start a visit",
     status_: "Status",
     surf_title: "Tooth surfaces",
@@ -845,7 +844,7 @@ dash_debtors: "{n} patients owe",
     nav_ai: "Ассистент",
     topbar_sub: "Рабочее пространство клиники",
     search: "Поиск",
-    search_ph: "Поиск пациентов, записей…",
+    search_ph: "Поиск пациентов…",
     search_hint: "Имя, телефон, дата или действие",
     qk_new_appt: "Записать пациента сейчас",
     qk_new_patient: "Добавить в список пациентов",
@@ -1176,9 +1175,9 @@ dash_debtors: "{n} patients owe",
     min: "мин",
     more_tools: "Ещё инструменты",
     msg_queued: "Сообщение в очереди",
-    n_done: "{n} завершено",
-    n_in_chair: "{n} в кресле",
-    n_waiting: "{n} ожидают",
+    n_done: "завершено",
+    n_in_chair: "в кресле",
+    n_waiting: "ожидают",
     nav_patients: "Пациенты",
     nav_settings: "Настройки",
     new_patient: "Новый пациент",
@@ -1198,7 +1197,7 @@ dash_debtors: "{n} patients owe",
     nothing_ahead: "Для «{who}» ничего не запланировано.",
     num_fdi: "FDI",
     num_uni: "Universal",
-    of_32: "из 32 зубов",
+    of_32: "{n} из 32 зубов",
     off_today: "Сегодня не в смене",
     on_duty: "В смене",
     online: "Онлайн",
@@ -1228,7 +1227,6 @@ dash_debtors: "{n} patients owe",
     search_patients: "Поиск пациентов",
     set_time: "Задать время",
     show_roots: "Корни (рентген)",
-    showing: "Показано",
     start_visit: "Начать приём",
     status_: "Статус",
     surf_title: "Поверхности зуба",
@@ -1367,7 +1365,7 @@ dash_debtors: "должников: {n}",
     nav_ai: "Assistent",
     topbar_sub: "Klinika ish maydoni",
     search: "Qidirish",
-    search_ph: "Bemor, qabul qidirish…",
+    search_ph: "Bemor qidirish…",
     search_hint: "Ism, telefon, sana yoki amal",
     qk_new_appt: "Bemorni hoziroq yozish",
     qk_new_patient: "Bemorni ro'yxatga qo'shish",
@@ -1698,9 +1696,9 @@ dash_debtors: "должников: {n}",
     min: "daq",
     more_tools: "Boshqa asboblar",
     msg_queued: "Xabar navbatga qo'yildi",
-    n_done: "{n} tugallandi",
-    n_in_chair: "{n} kresloda",
-    n_waiting: "{n} kutmoqda",
+    n_done: "tugallandi",
+    n_in_chair: "kresloda",
+    n_waiting: "kutmoqda",
     nav_patients: "Bemorlar",
     nav_settings: "Sozlamalar",
     new_patient: "Yangi bemor",
@@ -1720,7 +1718,7 @@ dash_debtors: "должников: {n}",
     nothing_ahead: "{who} uchun hech narsa rejalashtirilmagan.",
     num_fdi: "FDI",
     num_uni: "Universal",
-    of_32: "32 tishdan",
+    of_32: "32 tishdan {n} ta",
     off_today: "Bugun smenada emas",
     on_duty: "Smenada",
     online: "Onlayn",
@@ -1750,7 +1748,6 @@ dash_debtors: "должников: {n}",
     search_patients: "Bemorlarni qidirish",
     set_time: "Vaqtni belgilash",
     show_roots: "Ildizlar (rentgen)",
-    showing: "Ko'rsatilgan",
     start_visit: "Qabulni boshlash",
     status_: "Holat",
     surf_title: "Tish yuzalari",
@@ -3345,7 +3342,7 @@ function openPrintDoc(title, html) {
 function printDocCss() { return "font:13px/1.55 Inter,system-ui,sans-serif;color:#111;max-width:760px;margin:0 auto}h1{font-size:19px;margin:0 0 4px}h2{font-size:14px;margin:18px 0 6px}table{width:100%;border-collapse:collapse;font-size:12.5px}th,td{border-bottom:1px solid #dde;padding:6px 4px;text-align:left}th{font-size:11px;text-transform:uppercase;color:#667}.muted{color:#667}.head{display:flex;justify-content:space-between;gap:20px;border-bottom:2px solid #0e7c86;padding-bottom:10px;margin-bottom:14px}.sig{display:flex;justify-content:space-between;margin-top:40px}.r{text-align:right}.mono{font-variant-numeric:tabular-nums}"; }
 function openPrintPreview() {
   var d = state.printDoc; if (!d) return;
-  var body = '<div class="print-paper" style="' + printDocCss() + '">' + d.html + "</div>";
+  var body = '<div class="print-paper">' + d.html + "</div>";
   openModal(d.title, body, '<button type="button" class="btn" data-act="modal-close">' + esc(t("close")) + '</button><button type="button" class="btn btn-primary" data-act="print-now">' + esc(t("print")) + "</button>", null, null);
 }
 function printNow() {
@@ -3430,9 +3427,16 @@ function kpiId(id, lbl, val, sub, ico, hero) {
   return '<div class="kpi' + (hero ? " hero" : "") + '"><div class="k-lbl">' + esc(lbl) + "</div>" + (ico ? '<span class="k-ico">' + ico + "</span>" : "") + '<div class="k-val" id="' + esc(id) + '">' + esc(val) + "</div>" + (sub ? '<div class="k-sub">' + esc(sub) + "</div>" : "") + "</div>";
 }
 function barChart(rows, fmt) {
-  var max = 1; rows.forEach(function (r) { if (r.v > max) max = r.v; });
-  return '<div class="chart-bars">' + rows.map(function (r, i) {
-    return '<div class="bar' + (i === rows.length - 1 ? " hero" : "") + '" title="' + esc(r.l + ": " + (fmt ? fmt(r.v) : r.v)) + '"><b>' + (r.v ? esc(fmt ? shortNum(r.v) : r.v) : "") + '</b><i style="flex:' + Math.max(0.02, r.v / max).toFixed(3) + ' 1 0"></i><em></em><span>' + esc(r.l) + "</span></div>";
+  var max = 0; rows.forEach(function (r) { if (r.v > max) max = r.v; });
+  if (max <= 0) max = 1;
+  var dense = rows.length > 14, last = rows.length - 1;
+  return '<div class="chart-bars' + (dense ? " dense" : "") + '">' + rows.map(function (r, i) {
+    var h = r.v ? Math.max(6, Math.round(r.v / max * 100)) : 3;
+    var label = dense && i % 2 !== last % 2 ? "" : r.l;
+    return '<div class="bar' + (i === last ? " hero" : "") + '" title="' + esc(r.l + ": " + (fmt ? fmt(r.v) : r.v)) + '">' +
+      '<span class="bv">' + (r.v ? esc(fmt ? shortNum(r.v) : r.v) : "") + "</span>" +
+      '<div class="track"><i style="height:' + h + '%"></i></div>' +
+      '<span class="bl">' + esc(label) + "</span></div>";
   }).join("") + "</div>";
 }
 function shortNum(n) { n = +n || 0; if (Math.abs(n) >= 1e6) return (n / 1e6).toFixed(1) + "M"; if (Math.abs(n) >= 1e3) return (n / 1e3).toFixed(n >= 1e4 ? 0 : 1) + "k"; return String(Math.round(n)); }
@@ -3472,7 +3476,7 @@ function renderDashboard() {
   h += "</div>";
   h += '<div class="stack">';
   h += '<div class="card pad"><div class="sect-title">' + esc(t("queue_title")) + '<button class="more" data-act="nav" data-to="requests">' + esc(t("q_open_queue")) + " · " + pendingRequests().length + "</button></div>" + (pendingRequests().length ? pendingRequests().slice(0, 4).map(function (r) { return '<div class="req"><span class="nm">' + esc(r.name || "") + '</span><span class="m">' + esc(fmtShort(r.date)) + " " + esc(r.time || "") + "</span></div>"; }).join("") : '<p class="muted">' + esc(t("q_none")) + "</p>") + "</div>";
-  if (moduleOn("lab")) h += '<div class="card pad"><div class="sect-title"><span>' + esc(t("lab_active")) + "</span>" + (labDue.length ? '<span class="badge">' + labDue.length + "</span>" : "") + '<button class="more" data-act="nav" data-to="lab">' + esc(t("open")) + "</button></div>" + (labDue.length ? '<div class="rail-list">' + labDue.slice(0, 4).map(function (o) { var p = byId(state.patients, o.patientId); var late = o.dueAt && o.dueAt < todayStr(); return '<button class="rail-item" data-act="nav" data-to="lab"><span class="d" style="' + (late ? "background:var(--danger-soft);color:var(--danger)" : "") + '">' + esc(o.dueAt ? fmtShort(o.dueAt).replace(/^\S+ /, "") : "—") + '</span><span><span class="n">' + esc(p ? p.name : "?") + '</span><span class="m">' + esc(o.work || "") + " · " + esc(o.labName || "") + "</span></span></button>"; }).join("") + "</div>" : '<p class="muted">' + esc(t("lab_none")) + "</p>") + "</div>";
+  if (moduleOn("lab")) h += '<div class="card pad"><div class="sect-title"><span>' + esc(t("lab_active")) + "</span>" + (labDue.length ? '<span class="badge">' + labDue.length + "</span>" : "") + '<button class="more" data-act="nav" data-to="lab">' + esc(t("open")) + "</button></div>" + (labDue.length ? '<div class="rail-list">' + labDue.slice(0, 4).map(function (o) { var p = byId(state.patients, o.patientId); var late = o.dueAt && o.dueAt < todayStr(); return '<button class="rail-item" data-act="nav" data-to="lab"><span class="d" style="' + (late ? "background:var(--danger-soft);color:var(--danger)" : "") + '">' + esc(o.dueAt ? fmtShort(o.dueAt).replace(/^\S+ /, "") : "—") + '</span><span><span class="n">' + esc(p ? p.name : "?") + '</span><span class="m">' + esc([o.work, o.labName].filter(Boolean).join(" · ")) + "</span></span></button>"; }).join("") + "</div>" : '<p class="muted">' + esc(t("lab_none")) + "</p>") + "</div>";
   if (moduleOn("inventory") && lowStock.length) h += '<div class="card pad"><div class="sect-title">' + esc(t("inv_low")) + '<button class="more" data-act="nav" data-to="inventory">' + esc(t("open")) + "</button></div>" + lowStock.slice(0, 5).map(function (m) { return '<div class="req"><span class="nm">' + esc(m.name) + '</span><span class="m stock-low">' + esc(m.qty) + " / " + esc(m.minQty) + " " + esc(m.unit || "") + "</span></div>"; }).join("") + "</div>";
   h += "</div></div>";
   root.innerHTML = h;
@@ -3516,7 +3520,7 @@ function renderLab() {
     var p = byId(state.patients, o.patientId) || {};
     var late = o.dueAt && o.dueAt < todayStr() && ["done", "cancelled"].indexOf(o.status) < 0;
     h += '<div class="card pad"><div class="spread"><div><b>' + esc(p.name || "—") + "</b> <span class=\"muted mono\">" + esc(o.tooth ? numOf(+o.tooth) : "") + "</span></div>" + labStatusPill(o.status) + "</div>" +
-      '<p class="muted" style="font-size:12.5px;margin-top:4px">' + esc(o.work || "") + " · " + esc(o.labName || "") + "</p>" +
+      '<p class="muted" style="font-size:12.5px;margin-top:4px">' + esc([o.work, o.labName].filter(Boolean).join(" · ")) + "</p>" +
       '<div class="tooth-sub" style="margin:6px 0;' + (late ? "color:var(--danger);font-weight:700" : "") + '">' + (o.dueAt ? esc(t("lab_due")) + ": " + esc(fmtDate(o.dueAt)) : "") + (o.fee ? " · " + esc(t("lab_fee")) + ": " + esc(money(o.fee)) : "") + "</div>" +
       '<div class="timeline" style="margin-top:6px">' + timelineStages(o) + "</div>" +
       '<div class="row" style="margin-top:10px">' + (canWrite() && ["done", "cancelled"].indexOf(o.status) < 0 ? nextLabBtn(o) : "") + '<button class="btn btn-sm btn-ghost" data-act="lab-edit" data-id="' + esc(o.id) + '">' + esc(t("edit")) + "</button></div></div>";
@@ -3579,7 +3583,7 @@ function renderCashier() {
     return '<tr><td>' + esc(new Date(p.at || Date.now()).toLocaleTimeString().slice(0, 5) + " · " + fmtShort(ymd(new Date(p.at || Date.now())))) + "</td><td>" + esc(pt.name || "—") + '</td><td class="mono">' + esc(p.receiptNo || "") + "</td><td>" + esc(t("m_" + (p.method || "cash"))) + (p.discount ? ' <span class="tag alert">-' + esc(p.discount) + "%</span>" : "") + '</td><td class="r mono">' + esc(money(p.amount)) + '</td><td><button class="btn btn-sm btn-ghost" data-act="pay-receipt" data-id="' + esc(p.id) + '">' + esc(t("cash_receipt")) + '</button></td></tr>';
   }).join("") : '<tr><td colspan="6"><div class="empty">' + esc(t("cash_none")) + "</div></td></tr>") + "</tbody></table></div></div>";
   h += '<div class="card pad"><div class="sect-title">' + esc(t("cash_debtors")) + "</div>" + (debtors.length ? '<div class="list">' + debtors.map(function (x) {
-    return '<div class="list-row"><span class="avatar">' + esc(initials(x.p.name)) + '</span><div class="grow"><span class="t">' + esc(x.p.name) + '</span><span class="s">' + esc(x.p.phone || "") + '</span></div><b class="mono stock-low">' + esc(money(x.d)) + "</b>" + (canWrite() ? '<button class="btn btn-sm" data-act="pay-new" data-pid="' + esc(x.p.id) + '">' + esc(t("cash_new")) + "</button>" : "") + "</div>";
+    return '<div class="list-row"><span class="avatar">' + esc(initials(x.p.name)) + '</span><div class="grow"><span class="t">' + esc(x.p.name) + '</span><span class="s">' + esc(x.p.phone || "") + '</span></div><div class="debtor-tools"><b class="mono stock-low">' + esc(money(x.d)) + "</b>" + (canWrite() ? '<button class="btn btn-sm" data-act="pay-new" data-pid="' + esc(x.p.id) + '">' + esc(t("cash_new")) + "</button>" : "") + "</div></div>";
   }).join("") + "</div>" : '<p class="muted">' + esc(t("cash_no_debt")) + "</p>") + "</div></div>";
   root.innerHTML = h;
 }
@@ -4277,7 +4281,7 @@ function openAccount() {
   var body = '<div class="acct"><span class="avatar-chip" style="width:44px;height:44px">' + esc(initials(state.userName || "?")) + '</span><div><b>' + esc(state.userName || "—") + '</b><div class="muted">' + esc(roleLbl) + " · " + esc(state.clinicName || "") + "</div></div></div>" +
     '<div class="list" style="margin-top:12px">' + rowInfo(t("plan_label"), planLabel(state.plan)) + rowInfo(t("branch_all"), state.branchId ? (byId(state.branches, state.branchId) || {}).name || "—" : t("branch_all")) + "</div>" +
     (canManageStaff() ? '<button type="button" class="btn" style="width:100%;margin-top:12px" data-act="staff">' + ICO.staff + esc(t("manage_doctors")) + "</button>" : "") +
-    '<form method="post" action="/api/auth/logout" style="margin-top:8px"><button class="btn btn-ghost" style="width:100%" type="submit">' + esc(t("logout")) + "</button></form>";
+    '<button type="button" class="btn btn-ghost" style="width:100%;margin-top:8px" data-act="logout">' + esc(t("logout")) + "</button>";
   openModal(state.userName || t("account"), body, '<button type="button" class="btn" data-act="modal-close">' + esc(t("close")) + "</button>", null, null);
 }
 function openAi() {
@@ -5412,7 +5416,7 @@ function openToothSheet(pid, f) {
 function docView(id) {
   var d = byId(state.documents, id); if (!d) return;
   state.printDoc = { title: d.title || t("doc_title"), html: d.html || "" };
-  openModal(d.title || t("doc_title"), '<div class="print-paper" style="' + printDocCss() + '">' + (d.html || "") + "</div>", '<button type="button" class="btn" data-act="modal-close">' + esc(t("close")) + '</button><button type="button" class="btn btn-primary" data-act="print-now">' + esc(t("print")) + '</button><button type="button" class="btn" data-act="doc-send" data-id="' + esc(d.id) + '">' + esc(t("doc_send")) + "</button>", null, null);
+  openModal(d.title || t("doc_title"), '<div class="print-paper">' + (d.html || "") + "</div>", '<button type="button" class="btn" data-act="modal-close">' + esc(t("close")) + '</button><button type="button" class="btn btn-primary" data-act="print-now">' + esc(t("print")) + '</button><button type="button" class="btn" data-act="doc-send" data-id="' + esc(d.id) + '">' + esc(t("doc_send")) + "</button>", null, null);
 }
 function docSend(id) {
   var d = byId(state.documents, id); if (!d) return;
@@ -5522,6 +5526,7 @@ document.addEventListener("click", function (e) {
     case "search-open": openSearch(); break;
     case "pal-go": palGo(i); break;
     case "account": openAccount(); break;
+    case "logout": fetch("/api/auth/logout", { method: "POST" }).then(function () { location.href = "/login"; }, function () { location.href = "/login"; }); break;
     case "ai-open": openAi(); break;
     case "langt": openLangMenu(); break;
     case "theme-next": cycleTheme(state.theme === "light" ? "dark" : state.theme === "dark" ? "auto" : "light"); break;

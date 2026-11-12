@@ -14,9 +14,11 @@ function noStoreJson(body: unknown, status = 200) {
 }
 
 /**
- * Confirm or decline one of the doctor's own requests.
+ * Confirm, decline, complete or cancel one of the doctor's own requests.
  * confirm -> snapshot the profile address and guard against double booking.
  * decline -> keep the optional reason in doctorNote.
+ * complete -> mark a confirmed visit as done.
+ * cancel -> withdraw a requested or confirmed visit.
  */
 export async function PATCH(req: Request, { params }: Params) {
   const ctx = await requireDoctor();
@@ -29,7 +31,7 @@ export async function PATCH(req: Request, { params }: Params) {
 
   const body = await req.json().catch(() => null);
   const action = String(body?.action ?? "").trim();
-  if (action !== "confirm" && action !== "decline") {
+  if (!["confirm", "decline", "complete", "cancel"].includes(action)) {
     return noStoreJson({ error: "invalid_action", message: "Amal noto'g'ri." }, 400);
   }
 
@@ -57,6 +59,36 @@ export async function PATCH(req: Request, { params }: Params) {
   if (!booking || booking.doctorId !== ctx.profile.id) {
     return noStoreJson({ error: "not_found", message: "So'rov topilmadi." }, 404);
   }
+  if (action === "complete") {
+    if (booking.status !== "confirmed") {
+      return noStoreJson(
+        { error: "status_locked", message: "Faqat tasdiqlangan qabulni yakunlash mumkin." },
+        409
+      );
+    }
+    const updated = await prisma.networkBooking.update({
+      where: { id: booking.id },
+      data: { status: "completed", ...(note ? { doctorNote: note } : {}) },
+      include: { clinic: { select: { name: true } } },
+    });
+    return noStoreJson({ ok: true, booking: toBookingDTO(updated) });
+  }
+
+  if (action === "cancel") {
+    if (booking.status !== "confirmed" && booking.status !== "requested") {
+      return noStoreJson(
+        { error: "status_locked", message: "Bu qabulni bekor qilib bo'lmaydi." },
+        409
+      );
+    }
+    const updated = await prisma.networkBooking.update({
+      where: { id: booking.id },
+      data: { status: "cancelled", ...(note ? { doctorNote: note } : {}) },
+      include: { clinic: { select: { name: true } } },
+    });
+    return noStoreJson({ ok: true, booking: toBookingDTO(updated) });
+  }
+
   if (!CHANGABLE.includes(booking.status)) {
     return noStoreJson(
       { error: "status_locked", message: "Bu so'rov allaqachon ko'rib chiqilgan." },

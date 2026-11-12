@@ -100,6 +100,7 @@ model DoctorProfile {
   clinics     ClinicDoctor[]
   bookings    NetworkBooking[]
   reviews     DoctorReview[]
+  treatments  TreatmentRecord[]
 
   @@index([status, isPublic])
   @@index([name])
@@ -179,6 +180,29 @@ model NetworkBooking {
   @@index([doctorId, date, status])
   @@index([phone])
   @@index([clinicId, status])
+}
+
+/// One procedure performed on one tooth (or a general procedure with tooth = 0)
+/// during a visit. Rows created together share a visitId.
+model TreatmentRecord {
+  id           String        @id @default(cuid())
+  visitId      String
+  doctorId     String
+  doctor       DoctorProfile @relation(fields: [doctorId], references: [id], onDelete: Cascade)
+  bookingId    String?
+  patientName  String        @default("")
+  patientPhone String        @default("")
+  date         String // YYYY-MM-DD of the visit
+  tooth        Int // FDI number, 0 = general procedure
+  procedure    String
+  surfaces     String        @default("") // O, M, D, B, L subset
+  note         String        @default("")
+  createdAt    DateTime      @default(now())
+
+  @@index([doctorId, date])
+  @@index([doctorId, tooth])
+  @@index([doctorId, visitId])
+  @@index([bookingId])
 }
 
 model DoctorReview {
