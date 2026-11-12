@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { createPrismaClient } from "../lib/prisma-client";
 
 /**
  * Demo bookings for the independent network doctor so the dashboard,
@@ -6,7 +6,7 @@ import { PrismaClient } from "@prisma/client";
  * Idempotent: only rows with code prefix DM- are replaced.
  */
 
-const prisma = new PrismaClient();
+const prisma = createPrismaClient();
 const PROFILE_ID = "net-independent-demo";
 const CODE_PREFIX = "DM-";
 

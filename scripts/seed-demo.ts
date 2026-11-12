@@ -1,9 +1,9 @@
-import { PrismaClient } from "@prisma/client";
+import { createPrismaClient } from "../lib/prisma-client";
 import bcrypt from "bcryptjs";
 import { randomUUID } from "node:crypto";
 import { demoRecords } from "../lib/demo";
 
-const prisma = new PrismaClient();
+const prisma = createPrismaClient();
 const reset = process.argv.includes("--reset");
 
 async function main() {
